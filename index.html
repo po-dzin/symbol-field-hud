@@ -51,18 +51,18 @@
           <div class="bd">
             <div class="row">
               <div class="badge">Mode</div>
-              <button class="btn small" id="m_shadow">🕳️</button>
-              <button class="btn small" id="m_flow">♾️</button>
-              <button class="btn small" id="m_radiance">🔆</button>
+              <button class="btn small" id="m_shadow" data-mode="🕳️" data-role="mode">🕳️</button>
+              <button class="btn small" id="m_flow" data-mode="♾️" data-role="mode">♾️</button>
+              <button class="btn small" id="m_radiance" data-mode="🔆" data-role="mode">🔆</button>
             </div>
             <div class="hint mt8" id="mode_hint">flow · synthesis · resonance</div>
             <div class="row mt12">
               <div class="badge">Glyph</div>
-              <button class="btn small" id="g_dot">•</button>
-              <button class="btn small" id="g_bar">∣</button>
-              <button class="btn small" id="g_circle">◯</button>
-              <button class="btn small" id="g_core">⊙</button>
-              <button class="btn small" id="g_drift">∿</button>
+              <button class="btn small" id="g_dot" data-glyph="•" data-role="glyph">•</button>
+              <button class="btn small" id="g_bar" data-glyph="∣" data-role="glyph">∣</button>
+              <button class="btn small" id="g_circle" data-glyph="◯" data-role="glyph">◯</button>
+              <button class="btn small" id="g_core" data-glyph="⊙" data-role="glyph">⊙</button>
+              <button class="btn small" id="g_drift" data-glyph="∿" data-role="glyph">∿</button>
             </div>
             <div class="hint mt8">активный знак влияет на теги артефактов</div>
           </div>
@@ -107,13 +107,13 @@
           <div class="hd"><div>Quick Actions</div></div>
           <div class="bd">
             <div class="row">
-              <button class="btn small" id="qa_shadow">🕳️ Shadow</button>
-              <button class="btn small" id="qa_flow">♾️ Flow</button>
-              <button class="btn small" id="qa_radiance">🔆 Radiance</button>
+              <button class="btn small" id="qa_shadow" data-mode="🕳️">🕳️ Shadow</button>
+              <button class="btn small" id="qa_flow" data-mode="♾️">♾️ Flow</button>
+              <button class="btn small" id="qa_radiance" data-mode="🔆">🔆 Radiance</button>
             </div>
             <div class="row mt8">
-              <button class="btn small" id="qa_core">⊙ Core</button>
-              <button class="btn small" id="qa_drift">∿ Drift</button>
+              <button class="btn small" id="qa_core" data-glyph="⊙">⊙ Core</button>
+              <button class="btn small" id="qa_drift" data-glyph="∿">∿ Drift</button>
               <button class="btn small" id="qa_allxp">+ All XP</button>
             </div>
           </div>
@@ -144,227 +144,488 @@
   </div>
 
 <script>
-(function(){
-  const STORAGE_KEY = "symbolfield_hud_demo_v1";
-  const TODAY = new Date().toISOString().slice(0,10);
+  (function () {
+    const STORAGE_KEY = "symbolfield_hud_demo_v1";
+    const TODAY = new Date().toISOString().slice(0, 10);
 
-  const defaultRituals = [
-    { id: "vipassana", title: "Vipassana + breath + charge", emoji:"🧘‍♂️", xpAward:{DP:8, HP:2}, schedule:"daily", done:false },
-    { id: "move10", title: "10m mobility / flow", emoji:"🌀", xpAward:{HP:6, DP:2}, schedule:"adhoc", done:false },
-    { id: "create20", title: "20m glyph/sound sketch", emoji:"✍️", xpAward:{CP:8, MP:2}, schedule:"adhoc", done:false },
-  ];
+    const MODE_OPTIONS = [
+      { value: "🕳️", hint: "shadow · depth · compression" },
+      { value: "♾️", hint: "flow · synthesis · resonance" },
+      { value: "🔆", hint: "radiance · broadcast · clarity" },
+    ];
+    const GLYPH_VALUES = ["•", "∣", "◯", "⊙", "∿"];
+    const XP_TRACKS = [
+      { key: "HP", icon: "🪨" },
+      { key: "CP", icon: "💧" },
+      { key: "MP", icon: "🔥" },
+      { key: "DP", icon: "🌬️" },
+    ];
 
-  const defaultState = {
-    date: TODAY,
-    mode: "♾️",
-    glyph: "◯",
-    xp: { HP:0, CP:0, MP:0, DP:0 },
-    rituals: defaultRituals,
-    log: []
-  };
+    const DEFAULT_RITUALS = [
+      {
+        id: "vipassana",
+        title: "Vipassana + breath + charge",
+        emoji: "🧘‍♂️",
+        xpAward: { DP: 8, HP: 2 },
+        schedule: "daily",
+        done: false,
+      },
+      {
+        id: "move10",
+        title: "10m mobility / flow",
+        emoji: "🌀",
+        xpAward: { HP: 6, DP: 2 },
+        schedule: "adhoc",
+        done: false,
+      },
+      {
+        id: "create20",
+        title: "20m glyph/sound sketch",
+        emoji: "✍️",
+        xpAward: { CP: 8, MP: 2 },
+        schedule: "adhoc",
+        done: false,
+      },
+    ];
 
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return structuredClone(defaultState);
-      const s = JSON.parse(raw);
-      if(s.date !== TODAY){
-        s.date = TODAY;
-        s.rituals = s.rituals.map(r=>({...r, done:false}));
-        s.log.unshift({id:crypto.randomUUID(), ts:Date.now(), text:`↻ New day ${TODAY}: rituals reset`});
+    const MODE_HINTS = Object.fromEntries(
+      MODE_OPTIONS.map(({ value, hint }) => [value, hint])
+    );
+
+    function createDefaultState() {
+      return {
+        date: TODAY,
+        mode: "♾️",
+        glyph: "◯",
+        xp: Object.fromEntries(XP_TRACKS.map(({ key }) => [key, 0])),
+        rituals: DEFAULT_RITUALS.map((ritual) => ({
+          ...ritual,
+          xpAward: { ...ritual.xpAward },
+          done: false,
+        })),
+        log: [],
+      };
+    }
+
+    function createStateFrom(raw) {
+      const next = createDefaultState();
+      if (!raw || typeof raw !== "object") return next;
+
+      if (typeof raw.date === "string") next.date = raw.date;
+      if (MODE_HINTS[raw.mode]) next.mode = raw.mode;
+      if (GLYPH_VALUES.includes(raw.glyph)) next.glyph = raw.glyph;
+
+      if (raw.xp && typeof raw.xp === "object") {
+        XP_TRACKS.forEach(({ key }) => {
+          const value = Number(raw.xp[key]);
+          if (Number.isFinite(value)) next.xp[key] = value;
+        });
       }
-      return s;
-    }catch(e){
-      return structuredClone(defaultState);
+
+      if (Array.isArray(raw.rituals)) {
+        next.rituals = raw.rituals.map((ritual) => {
+          const normalized = {
+            id:
+              typeof ritual.id === "string" && ritual.id.trim()
+                ? ritual.id
+                : crypto.randomUUID(),
+            title: typeof ritual.title === "string" ? ritual.title : "",
+            emoji: typeof ritual.emoji === "string" ? ritual.emoji : "",
+            xpAward: {},
+            schedule:
+              typeof ritual.schedule === "string" && ritual.schedule.trim()
+                ? ritual.schedule
+                : "adhoc",
+            done: Boolean(ritual.done),
+          };
+
+          if (ritual.xpAward && typeof ritual.xpAward === "object") {
+            XP_TRACKS.forEach(({ key }) => {
+              const value = Number(ritual.xpAward[key]);
+              if (Number.isFinite(value)) normalized.xpAward[key] = value;
+            });
+          }
+
+          return normalized;
+        });
+      }
+
+      if (Array.isArray(raw.log)) {
+        next.log = raw.log
+          .filter((entry) => entry && typeof entry.text === "string")
+          .map((entry) => ({
+            id:
+              typeof entry.id === "string" && entry.id.trim()
+                ? entry.id
+                : crypto.randomUUID(),
+            ts: Number.isFinite(Number(entry.ts))
+              ? Number(entry.ts)
+              : Date.now(),
+            text: entry.text,
+          }))
+          .slice(0, 200);
+      }
+
+      return next;
     }
-  }
-  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
-  let state = load();
-
-  // DOM refs
-  const $date = document.getElementById("date");
-  const $mode_hint = document.getElementById("mode_hint");
-  const $xp_list = document.getElementById("xp_list");
-  const $xp_total = document.getElementById("xp_total");
-  const $rituals = document.getElementById("rituals");
-  const $log = document.getElementById("log");
-  const $cmd = document.getElementById("cmd");
-
-  const modeHints = {
-    "🕳️":"shadow · depth · compression",
-    "♾️":"flow · synthesis · resonance",
-    "🔆":"radiance · broadcast · clarity"
-  };
-
-  function addLog(text){
-    state.log.unshift({id:crypto.randomUUID(), ts:Date.now(), text});
-    state.log = state.log.slice(0,200);
-  }
-
-  function awardXP(delta, reason){
-    const keys = ["HP","CP","MP","DP"];
-    keys.forEach(k=>{ state.xp[k] = (state.xp[k]||0) + (delta[k]||0); });
-    const pretty = Object.entries(delta).map(([k,v])=>`${k}+${v}`).join(" ");
-    addLog(`+XP ${pretty} — ${reason}`);
-  }
-
-  function toggleRitual(id){
-    const r = state.rituals.find(x=>x.id===id);
-    if(!r) return;
-    r.done = !r.done;
-    if(r.done) awardXP(r.xpAward, `✔ ${r.title}`);
-    else addLog(`☐ ${r.title} — undone`);
-    render(); save();
-  }
-
-  function setMode(m){
-    state.mode = m;
-    addLog(`∷ Mode → ${m}`);
-    render(); save();
-  }
-  function setGlyph(g){
-    state.glyph = g;
-    addLog(`◐ Glyph → ${g}`);
-    render(); save();
-  }
-
-  function handleCommand(raw){
-    const text = raw.trim();
-    if(!text) return;
-    if(text.startsWith("/mode ")){
-      const m = text.split(" ")[1];
-      if(["🕳️","♾️","🔆"].includes(m)) setMode(m);
-      else addLog(`? Unknown mode: ${m}`);
-    }else if(text.startsWith("/glyph ")){
-      const g = text.split(" ")[1];
-      if(["•","∣","◯","⊙","∿"].includes(g)) setGlyph(g);
-      else addLog(`? Unknown glyph: ${g}`);
-    }else if(text.startsWith("/xp ")){
-      const parts = text.replace("/xp ","").split(/\s+/);
-      const delta = {};
-      parts.forEach(p=>{
-        const mt = p.match(/(HP|CP|MP|DP)\+(\d+)/);
-        if(mt) delta[mt[1]] = parseInt(mt[2],10);
-      });
-      if(Object.keys(delta).length) { awardXP(delta, "manual"); render(); save(); }
-      else addLog("? No XP parsed");
-    }else if(text === "/reset"){
-      state.rituals.forEach(r=>r.done=false);
-      addLog("↺ HUD soft reset (rituals/log)");
-      state.log = state.log.slice(0,200);
-      render(); save();
-    }else{
-      addLog(text); render(); save();
-    }
-    $cmd.value = "";
-  }
-
-  function exportJSON(){
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `symbolfield_hud_${state.date}.json`; a.click();
-    URL.revokeObjectURL(url);
-  }
-  function importJSON(file){
-    const reader = new FileReader();
-    reader.onload = ()=>{
+    function load() {
       try {
-        const data = JSON.parse(String(reader.result));
-        state = data;
-        addLog("⬑ Imported state JSON");
-        render(); save();
-      }catch{ addLog("! Import failed"); render(); }
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createDefaultState();
+        const parsed = createStateFrom(JSON.parse(raw));
+        if (parsed.date !== TODAY) {
+          parsed.date = TODAY;
+          parsed.rituals = parsed.rituals.map((ritual) => ({
+            ...ritual,
+            done: false,
+          }));
+          parsed.log.unshift({
+            id: crypto.randomUUID(),
+            ts: Date.now(),
+            text: `↻ New day ${TODAY}: rituals reset`,
+          });
+          parsed.log = parsed.log.slice(0, 200);
+        }
+        return parsed;
+      } catch (error) {
+        console.warn("Failed to load state", error);
+        return createDefaultState();
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    let state = load();
+
+    const dom = {
+      date: document.getElementById("date"),
+      modeHint: document.getElementById("mode_hint"),
+      xpList: document.getElementById("xp_list"),
+      xpTotal: document.getElementById("xp_total"),
+      rituals: document.getElementById("rituals"),
+      log: document.getElementById("log"),
+      cmd: document.getElementById("cmd"),
     };
-    reader.readAsText(file);
-  }
 
-  // wiring
-  document.getElementById("m_shadow").onclick = ()=>setMode("🕳️");
-  document.getElementById("m_flow").onclick = ()=>setMode("♾️");
-  document.getElementById("m_radiance").onclick = ()=>setMode("🔆");
+    function sync() {
+      render();
+      save();
+    }
 
-  document.getElementById("g_dot").onclick = ()=>setGlyph("•");
-  document.getElementById("g_bar").onclick = ()=>setGlyph("∣");
-  document.getElementById("g_circle").onclick = ()=>setGlyph("◯");
-  document.getElementById("g_core").onclick = ()=>setGlyph("⊙");
-  document.getElementById("g_drift").onclick = ()=>setGlyph("∿");
+    function addLog(text) {
+      state.log.unshift({ id: crypto.randomUUID(), ts: Date.now(), text });
+      state.log = state.log.slice(0, 200);
+    }
 
-  document.getElementById("qa_shadow").onclick = ()=>setMode("🕳️");
-  document.getElementById("qa_flow").onclick = ()=>setMode("♾️");
-  document.getElementById("qa_radiance").onclick = ()=>setMode("🔆");
-  document.getElementById("qa_core").onclick = ()=>setGlyph("⊙");
-  document.getElementById("qa_drift").onclick = ()=>setGlyph("∿");
-  document.getElementById("qa_allxp").onclick = ()=>{ awardXP({HP:3,CP:3,MP:3,DP:3}, "quick"); render(); save(); };
+    function awardXP(delta, reason) {
+      XP_TRACKS.forEach(({ key }) => {
+        const increment = Number(delta[key]) || 0;
+        state.xp[key] = (state.xp[key] || 0) + increment;
+      });
+      const pretty = Object.entries(delta)
+        .filter(([, value]) => Number(value))
+        .map(([key, value]) => `${key}+${value}`)
+        .join(" ");
+      if (pretty) {
+        addLog(`+XP ${pretty} — ${reason}`);
+      }
+    }
 
-  document.getElementById("reset_btn").onclick = ()=>{ state = load(); render(); save(); };
+    function toggleRitual(id) {
+      const ritual = state.rituals.find((item) => item.id === id);
+      if (!ritual) return;
+      ritual.done = !ritual.done;
+      if (ritual.done) {
+        awardXP(ritual.xpAward, `✔ ${ritual.title}`);
+      } else {
+        addLog(`☐ ${ritual.title} — undone`);
+      }
+      sync();
+    }
 
-  document.getElementById("run").onclick = ()=>handleCommand($cmd.value);
-  $cmd.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleCommand($cmd.value); });
+    function setMode(value) {
+      state.mode = value;
+      addLog(`∷ Mode → ${value}`);
+      sync();
+    }
 
-  document.getElementById("export_json").onclick = exportJSON;
-  document.getElementById("import_json").addEventListener("change", (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(file) importJSON(file);
-  });
+    function setGlyph(value) {
+      state.glyph = value;
+      addLog(`◐ Glyph → ${value}`);
+      sync();
+    }
 
-  function progressRow(label,key,icon){
-    const val = state.xp[key]||0;
-    const pct = Math.min(100, val % 100);
-    return (`
-      <div class="mt8">
-        <div class="between">
-          <div class="row"><strong>${key}</strong><span>${icon}</span></div>
-          <span class="mono">${val}</span>
-        </div>
-        <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
-      </div>
-    `);
-  }
+    function handleCommand(raw) {
+      const text = raw.trim();
+      if (!text) return;
 
-  function render(){
-    $date.textContent = state.date;
-    $mode_hint.textContent = modeHints[state.mode] || "";
-    // highlight current mode/glyph
-    document.querySelectorAll('[id^="m_"],[id^="g_"]').forEach(b=>b.removeAttribute("aria-current"));
-    ({ "🕳️":"m_shadow","♾️":"m_flow","🔆":"m_radiance" }[state.mode] && document.getElementById({ "🕳️":"m_shadow","♾️":"m_flow","🔆":"m_radiance" }[state.mode]).setAttribute("aria-current","true"));
-    ({ "•":"g_dot","∣":"g_bar","◯":"g_circle","⊙":"g_core","∿":"g_drift" }[state.glyph] && document.getElementById({ "•":"g_dot","∣":"g_bar","◯":"g_circle","⊙":"g_core","∿":"g_drift" }[state.glyph]).setAttribute("aria-current","true"));
+      const [command, ...rest] = text.split(/\s+/);
+      if (command === "/mode") {
+        const value = rest[0];
+        if (MODE_HINTS[value]) {
+          setMode(value);
+        } else {
+          addLog(`? Unknown mode: ${value || ""}`);
+          sync();
+        }
+      } else if (command === "/glyph") {
+        const value = rest[0];
+        if (GLYPH_VALUES.includes(value)) {
+          setGlyph(value);
+        } else {
+          addLog(`? Unknown glyph: ${value || ""}`);
+          sync();
+        }
+      } else if (command === "/xp") {
+        const delta = {};
+        rest.forEach((part) => {
+          const match = part.match(/(HP|CP|MP|DP)\+(\d+)/);
+          if (match) delta[match[1]] = Number(match[2]);
+        });
+        if (Object.keys(delta).length) {
+          awardXP(delta, "manual");
+          sync();
+        } else {
+          addLog("? No XP parsed");
+          sync();
+        }
+      } else if (command === "/reset") {
+        state.rituals.forEach((ritual) => {
+          ritual.done = false;
+        });
+        addLog("↺ HUD soft reset (rituals/log)");
+        state.log = state.log.slice(0, 200);
+        sync();
+      } else {
+        addLog(text);
+        sync();
+      }
 
-    // XP
-    $xp_list.innerHTML = [
-      progressRow("HP","HP","🪨"),
-      progressRow("CP","CP","💧"),
-      progressRow("MP","MP","🔥"),
-      progressRow("DP","DP","🌬️"),
-    ].join("");
-    $xp_total.textContent = (state.xp.HP+state.xp.CP+state.xp.MP+state.xp.DP);
+      dom.cmd.value = "";
+    }
 
-    // Rituals
-    $rituals.innerHTML = state.rituals.map(r=>`
-      <div class="item ${r.done?'ok':''}">
-        <div class="row">
-          <button class="btn small" onclick="__toggle('${r.id}')">${r.done?'★':'✦'}</button>
-          <div>
-            <div><strong>${r.emoji} ${r.title}</strong></div>
-            <div class="hint">award: ${Object.entries(r.xpAward).map(([k,v])=>k+"+"+v).join(" ")}</div>
-          </div>
-        </div>
-        <span class="badge">${r.schedule}</span>
-      </div>
-    `).join("");
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `symbolfield_hud_${state.date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
-    // Log
-    $log.innerHTML = state.log.map(it=>`
-      <div class="item"><div class="mono">[${new Date(it.ts).toLocaleTimeString()}] ${it.text}</div></div>
-    `).join("");
-  }
+    function importJSON(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          state = createStateFrom(data);
+          addLog("⬑ Imported state JSON");
+          sync();
+        } catch (error) {
+          console.warn("Import failed", error);
+          addLog("! Import failed");
+          sync();
+        }
+      };
+      reader.readAsText(file);
+    }
 
-  // expose small bridge for onclick
-  window.__toggle = toggleRitual;
+    function renderMode() {
+      dom.modeHint.textContent = MODE_HINTS[state.mode] || "";
+      document.querySelectorAll('[data-role="mode"]').forEach((button) => {
+        button.toggleAttribute("aria-current", button.dataset.mode === state.mode);
+      });
+    }
 
-  render(); save();
-})();
+    function renderGlyph() {
+      document.querySelectorAll('[data-role="glyph"]').forEach((button) => {
+        button.toggleAttribute(
+          "aria-current",
+          button.dataset.glyph === state.glyph
+        );
+      });
+    }
+
+    function renderXp() {
+      const fragment = document.createDocumentFragment();
+      let total = 0;
+
+      XP_TRACKS.forEach(({ key, icon }) => {
+        const value = Number(state.xp[key]) || 0;
+        total += value;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "mt8";
+
+        const header = document.createElement("div");
+        header.className = "between";
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const label = document.createElement("strong");
+        label.textContent = key;
+
+        const iconEl = document.createElement("span");
+        iconEl.textContent = icon;
+
+        row.append(label, iconEl);
+
+        const valueEl = document.createElement("span");
+        valueEl.className = "mono";
+        valueEl.textContent = String(value);
+
+        header.append(row, valueEl);
+
+        const progress = document.createElement("div");
+        progress.className = "progress";
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.width = `${Math.min(100, value % 100)}%`;
+        progress.append(bar);
+
+        wrapper.append(header, progress);
+        fragment.append(wrapper);
+      });
+
+      dom.xpList.replaceChildren(fragment);
+      dom.xpTotal.textContent = String(total);
+    }
+
+    function renderRituals() {
+      const fragment = document.createDocumentFragment();
+
+      state.rituals.forEach((ritual) => {
+        const item = document.createElement("div");
+        item.className = `item${ritual.done ? " ok" : ""}`;
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const toggle = document.createElement("button");
+        toggle.className = "btn small";
+        toggle.dataset.ritualToggle = ritual.id;
+        toggle.textContent = ritual.done ? "★" : "✦";
+
+        const details = document.createElement("div");
+        const title = document.createElement("div");
+        const titleText = document.createElement("strong");
+        titleText.textContent = `${ritual.emoji} ${ritual.title}`.trim();
+        title.append(titleText);
+
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        const awards = Object.entries(ritual.xpAward || {})
+          .map(([key, value]) => `${key}+${value}`)
+          .join(" ");
+        hint.textContent = awards ? `award: ${awards}` : "award: —";
+
+        details.append(title, hint);
+
+        row.append(toggle, details);
+        item.append(row);
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = ritual.schedule;
+        item.append(badge);
+
+        fragment.append(item);
+      });
+
+      dom.rituals.replaceChildren(fragment);
+    }
+
+    function renderLog() {
+      const fragment = document.createDocumentFragment();
+
+      state.log.forEach((entry) => {
+        const item = document.createElement("div");
+        item.className = "item";
+
+        const text = document.createElement("div");
+        text.className = "mono";
+        text.textContent = `[${new Date(entry.ts).toLocaleTimeString()}] ${entry.text}`;
+
+        item.append(text);
+        fragment.append(item);
+      });
+
+      dom.log.replaceChildren(fragment);
+    }
+
+    function render() {
+      dom.date.textContent = state.date;
+      renderMode();
+      renderGlyph();
+      renderXp();
+      renderRituals();
+      renderLog();
+    }
+
+    function attachChoiceHandlers(attribute, setter) {
+      document.querySelectorAll(`[data-${attribute}]`).forEach((button) => {
+        button.addEventListener("click", () => setter(button.dataset[attribute]));
+      });
+    }
+
+    attachChoiceHandlers("mode", setMode);
+    attachChoiceHandlers("glyph", setGlyph);
+
+    document
+      .getElementById("qa_allxp")
+      .addEventListener("click", () => {
+        awardXP({ HP: 3, CP: 3, MP: 3, DP: 3 }, "quick");
+        sync();
+      });
+
+    document
+      .getElementById("reset_btn")
+      .addEventListener("click", () => {
+        state = load();
+        sync();
+      });
+
+    document.getElementById("run").addEventListener("click", () => {
+      handleCommand(dom.cmd.value);
+    });
+
+    dom.cmd.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        handleCommand(dom.cmd.value);
+      }
+    });
+
+    dom.rituals.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-ritual-toggle]");
+      if (target) {
+        toggleRitual(target.dataset.ritualToggle);
+      }
+    });
+
+    document
+      .getElementById("export_json")
+      .addEventListener("click", exportJSON);
+
+    document
+      .getElementById("import_json")
+      .addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) {
+          importJSON(file);
+          event.target.value = "";
+        }
+      });
+
+    render();
+    save();
+  })();
 </script>
 </body>
 </html>
