@@ -1,370 +1,357 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SymbolField HUD — Demo (Single File)</title>
-  <style>
-    :root{
-      --bg:#fafafa;--fg:#111;--muted:#666;--border:#e6e6e6;
-      --accent:#111;--chip:#f1f1f1;--ok:#eaffea;--okb:#b7e0b7;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
-    .wrap{max-width:1120px;margin:0 auto;padding:20px}
-    h1{font-size:18px;margin:0 0 8px}
-    .grid{display:grid;gap:16px}
-    @media(min-width:1000px){.grid{grid-template-columns:280px 1fr 280px}}
-    .card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 0 0 rgba(0,0,0,0.02)}
-    .card .hd{padding:14px 14px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-    .card .bd{padding:12px 14px}
-    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .badge{border:1px solid var(--border);background:var(--chip);border-radius:999px;padding:3px 8px;font-size:12px}
-    .btn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;cursor:pointer}
-    .btn[aria-current="true"]{background:#111;color:#fff;border-color:#111}
-    .btn.small{padding:4px 8px;font-size:12px}
-    .chip{padding:6px 10px;border:1px solid var(--border);border-radius:12px}
-    .muted{color:var(--muted)}
-    .list{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:260px;overflow:auto}
-    .item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)}
-    .item:last-child{border-bottom:none}
-    .ok{background:var(--ok);border-color:var(--okb)}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-    .input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:10px}
-    .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
-    .between{display:flex;align-items:center;justify-content:space-between}
-    .progress{height:6px;background:#f0f0f0;border-radius:999px;overflow:hidden}
-    .bar{height:100%;background:#111;width:0%}
-    .hint{font-size:12px;color:var(--muted)}
-    .col{display:flex;flex-direction:column;gap:8px}
-    .stack2{display:grid;grid-template-columns:1fr auto;gap:8px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SymbolField HUD</title>
+<style>
+:root{--bg:#fafafa;--fg:#111;--border:#e6e6e6;--muted:#666;}
+body[data-theme="dark"]{--bg:#0f0f0f;--fg:#fafafa;--border:#222;}
+body[data-theme="zen"]{--bg:#f9f7f2;--fg:#222;}
+body[data-theme="light"]{--bg:#ffffff;--fg:#111;}
+body{
+ background:var(--bg);color:var(--fg);
+ font:15px/1.5 Inter,system-ui,sans-serif;margin:0;
+ transition:background .6s ease,color .3s ease;
+}
+/* mood-based gradients */
+body[data-mood="🔴"]{background:radial-gradient(circle at 50% 20%,#ffb3b3,#1a0000);}
+body[data-mood="🟠"]{background:radial-gradient(circle at 50% 20%,#ffd8b3,#331500);}
+body[data-mood="🟢"]{background:radial-gradient(circle at 50% 20%,#c6ffcc,#00280d);}
+body[data-mood="🔵"]{background:radial-gradient(circle at 50% 20%,#b3e1ff,#001433);}
+body[data-mood="🟣"]{background:radial-gradient(circle at 50% 20%,#e5b3ff,#2b0044);}
+h1{text-align:center;margin:20px 0;font-size:2rem;font-weight:600;letter-spacing:.03em;
+ background:linear-gradient(90deg,#111,#555);
+ -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+body[data-mode="🔆"] h1{background:linear-gradient(90deg,#ff9800,#ffc400);}
+body[data-mode="♾️"] h1{background:linear-gradient(90deg,#38bdf8,#a855f7);}
+body[data-mode="🕳️"] h1{background:linear-gradient(90deg,#111,#333);}
+.grid{max-width:1100px;margin:auto;display:grid;gap:18px;padding:0 16px}
+@media(min-width:900px){.grid{grid-template-columns:280px 1fr 280px}}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.hd{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.bd{padding:12px 14px}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:12px}
+.btn{border:1px solid var(--border);border-radius:999px;padding:5px 10px;background:none;cursor:pointer}
+.btn[aria-current="true"]{background:var(--fg);color:var(--bg)}
+.mono{font-family:ui-monospace,monospace}
+.progress{height:6px;background:#e6e6e6;border-radius:999px;overflow:hidden}
+.bar{height:100%;background:var(--fg)}
+.hint{font-size:12px;color:var(--muted)}
+.list{max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:10px}
+.item{padding:6px 10px;border-bottom:1px solid var(--border)}
+</style>
 </head>
-<body>
-  <div class="wrap">
-    <h1>SymbolField HUD — демо</h1>
-    <div class="grid">
-      <!-- LEFT: Status + XP -->
-      <div class="col">
-        <div class="card">
-          <div class="hd"><div>Статус</div><div class="badge mono" id="date"></div></div>
-          <div class="bd">
-            <div class="row">
-              <div class="badge">Mode</div>
-              <button class="btn small" id="m_shadow">🕳️</button>
-              <button class="btn small" id="m_flow">♾️</button>
-              <button class="btn small" id="m_radiance">🔆</button>
-            </div>
-            <div class="hint mt8" id="mode_hint">flow · synthesis · resonance</div>
-            <div class="row mt12">
-              <div class="badge">Glyph</div>
-              <button class="btn small" id="g_dot">•</button>
-              <button class="btn small" id="g_bar">∣</button>
-              <button class="btn small" id="g_circle">◯</button>
-              <button class="btn small" id="g_core">⊙</button>
-              <button class="btn small" id="g_drift">∿</button>
-            </div>
-            <div class="hint mt8">активный знак влияет на теги артефактов</div>
-          </div>
-        </div>
+<body data-mode="♾️" data-theme="status" data-mood="🟢">
+<h1>SymbolField HUD</h1>
+<div class="grid">
+  <!-- LEFT: STATE -->
+  <div>
+    <div class="card">
+      <div class="hd"><div id="t_state"></div>
+        <div><select id="lang">
+          <option value="ru">RU</option><option value="en">EN</option></select></div></div>
+      <div class="bd">
+        <div id="dateMoon"></div>
 
-        <div class="card">
-          <div class="hd"><div>XP Ledger</div></div>
-          <div class="bd">
-            <div id="xp_list"></div>
-            <div class="between hint mt8"><span>Total</span><span class="mono" id="xp_total">0</span></div>
-          </div>
+        <div class="row mt8" data-group="mode">
+          <span class="badge">Mode</span>
+          <button class="btn" id="m1" type="button" data-mode="🕳️">🕳️</button>
+          <button class="btn" id="m2" type="button" data-mode="♾️">♾️</button>
+          <button class="btn" id="m3" type="button" data-mode="🔆">🔆</button>
         </div>
-      </div>
+        <div class="hint" id="mode_hint"></div>
 
-      <!-- CENTER: Rituals + Log -->
-      <div class="col">
-        <div class="card">
-          <div class="hd">
-            <div>Rituals <span class="badge">daily</span></div>
-            <div class="row">
-              <button class="btn small" id="reset_btn">↻ Reset</button>
-            </div>
-          </div>
-          <div class="bd" id="rituals"></div>
+        <div class="row mt8" data-group="mood">
+          <span class="badge">Mood</span>
+          <button class="btn" id="mo1" type="button" data-mood="🔴">🔴</button>
+          <button class="btn" id="mo2" type="button" data-mood="🟠">🟠</button>
+          <button class="btn" id="mo3" type="button" data-mood="🟢">🟢</button>
+          <button class="btn" id="mo4" type="button" data-mood="🔵">🔵</button>
+          <button class="btn" id="mo5" type="button" data-mood="🟣">🟣</button>
         </div>
+        <div class="hint" id="mood_hint"></div>
 
-        <div class="card">
-          <div class="hd"><div>Canvas · Log</div></div>
-          <div class="bd">
-            <div class="stack2">
-              <input id="cmd" class="input mono" placeholder="/mode ♾️ | /glyph ⊙ | /xp HP+3 CP+2 | write a note" />
-              <button class="btn" id="run">Run ▶</button>
-            </div>
-            <div class="list mt12" id="log"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Quick + Focus + Export -->
-      <div class="col">
-        <div class="card">
-          <div class="hd"><div>Quick Actions</div></div>
-          <div class="bd">
-            <div class="row">
-              <button class="btn small" id="qa_shadow">🕳️ Shadow</button>
-              <button class="btn small" id="qa_flow">♾️ Flow</button>
-              <button class="btn small" id="qa_radiance">🔆 Radiance</button>
-            </div>
-            <div class="row mt8">
-              <button class="btn small" id="qa_core">⊙ Core</button>
-              <button class="btn small" id="qa_drift">∿ Drift</button>
-              <button class="btn small" id="qa_allxp">+ All XP</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="hd"><div>Today Focus</div></div>
-          <div class="bd">
-            <div class="between"><span>Lower triad</span><span class="badge">🦶︎→🪶→🦷</span></div>
-            <div class="between mt8"><span>Higher triad</span><span class="badge">🌬️→👁️‍🗨️→🗣️</span></div>
-            <div class="hint mt12">“Кольцо дышит. Зерно светится. Тишина держит форму.”</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="hd"><div>Export / Import</div></div>
-          <div class="bd">
-            <div class="row">
-              <button class="btn" id="export_json">⬇ Export JSON</button>
-              <label class="btn" for="import_json">⬆ Import JSON</label>
-              <input type="file" id="import_json" accept="application/json" style="display:none" />
-            </div>
-            <div class="hint mt8">Один файл — можно загрузить на GitHub Pages / Vercel / Netlify Drop.</div>
-          </div>
+        <div class="row mt8" data-group="glyph">
+          <span class="badge">Glyph</span>
+          <button class="btn" id="g1" type="button" data-glyph="•">•</button><button class="btn" id="g2" type="button" data-glyph="∣">∣</button>
+          <button class="btn" id="g3" type="button" data-glyph="◯">◯</button><button class="btn" id="g4" type="button" data-glyph="⊙">⊙</button>
+          <button class="btn" id="g5" type="button" data-glyph="∿">∿</button>
         </div>
       </div>
     </div>
+
+    <div class="card mt16"><div class="hd"><div id="t_xp"></div></div>
+      <div class="bd" id="xp"></div>
+    </div>
   </div>
 
+  <!-- CENTER -->
+  <div>
+    <div class="card"><div class="hd"><div>/arc + /quest</div></div>
+      <div class="bd" id="arcquest">Arc A1 — Awakening · Quest: Stabilize ritual loop</div></div>
+    <div class="card mt16"><div class="hd"><div>/quote</div></div>
+      <div class="bd" id="quote">«Кольцо дышит. Зерно светится. Тишина держит форму.»</div></div>
+    <div class="card mt16"><div class="hd"><div>/reminder</div></div>
+      <div class="bd">∣ ◯ ⊙ → Vipassana + breath + charge (08:00)</div></div>
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+    <div class="card"><div class="hd"><div>/xp + /audit</div></div>
+      <div class="bd list" id="log"></div></div>
+    <div class="card mt16"><div class="hd"><div>Theme</div></div>
+      <div class="bd">
+        <select id="theme">
+          <option value="status">Status-depended</option>
+          <option value="dark">Dark</option>
+          <option value="zen">Zen</option>
+          <option value="light">Light</option>
+        </select>
+      </div></div>
+  </div>
+</div>
+
 <script>
-(function(){
-  const STORAGE_KEY = "symbolfield_hud_demo_v1";
-  const TODAY = new Date().toISOString().slice(0,10);
-
-  const defaultRituals = [
-    { id: "vipassana", title: "Vipassana + breath + charge", emoji:"🧘‍♂️", xpAward:{DP:8, HP:2}, schedule:"daily", done:false },
-    { id: "move10", title: "10m mobility / flow", emoji:"🌀", xpAward:{HP:6, DP:2}, schedule:"adhoc", done:false },
-    { id: "create20", title: "20m glyph/sound sketch", emoji:"✍️", xpAward:{CP:8, MP:2}, schedule:"adhoc", done:false },
-  ];
-
-  const defaultState = {
-    date: TODAY,
-    mode: "♾️",
-    glyph: "◯",
-    xp: { HP:0, CP:0, MP:0, DP:0 },
-    rituals: defaultRituals,
-    log: []
+class SymbolFieldHUD{
+  static TEXT={ru:{state:"Состояние",xp:"Панель опыта"},
+               en:{state:"State",xp:"XP Dashboard"}};
+  static MODES=["🕳️","♾️","🔆"];
+  static MOODS=["🔴","🟠","🟢","🔵","🟣"];
+  static GLYPHS=["•","∣","◯","⊙","∿"];
+  static THEMES=["status","dark","zen","light"];
+  static MODE_HINTS={"🕳️":"shadow · depth · compression",
+                     "♾️":"flow · synthesis · resonance",
+                     "🔆":"radiance · broadcast · clarity"};
+  static MOOD_HINTS={
+    "🔴":"vital · active · embodied",
+    "🟠":"creative · expressive · warm",
+    "🟢":"balanced · centered · organic",
+    "🔵":"clear · focused · calm",
+    "🟣":"integral · inspired · subtle",
   };
-
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return structuredClone(defaultState);
-      const s = JSON.parse(raw);
-      if(s.date !== TODAY){
-        s.date = TODAY;
-        s.rituals = s.rituals.map(r=>({...r, done:false}));
-        s.log.unshift({id:crypto.randomUUID(), ts:Date.now(), text:`↻ New day ${TODAY}: rituals reset`});
-      }
-      return s;
-    }catch(e){
-      return structuredClone(defaultState);
-    }
-  }
-  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-
-  let state = load();
-
-  // DOM refs
-  const $date = document.getElementById("date");
-  const $mode_hint = document.getElementById("mode_hint");
-  const $xp_list = document.getElementById("xp_list");
-  const $xp_total = document.getElementById("xp_total");
-  const $rituals = document.getElementById("rituals");
-  const $log = document.getElementById("log");
-  const $cmd = document.getElementById("cmd");
-
-  const modeHints = {
-    "🕳️":"shadow · depth · compression",
-    "♾️":"flow · synthesis · resonance",
-    "🔆":"radiance · broadcast · clarity"
-  };
-
-  function addLog(text){
-    state.log.unshift({id:crypto.randomUUID(), ts:Date.now(), text});
-    state.log = state.log.slice(0,200);
-  }
-
-  function awardXP(delta, reason){
-    const keys = ["HP","CP","MP","DP"];
-    keys.forEach(k=>{ state.xp[k] = (state.xp[k]||0) + (delta[k]||0); });
-    const pretty = Object.entries(delta).map(([k,v])=>`${k}+${v}`).join(" ");
-    addLog(`+XP ${pretty} — ${reason}`);
-  }
-
-  function toggleRitual(id){
-    const r = state.rituals.find(x=>x.id===id);
-    if(!r) return;
-    r.done = !r.done;
-    if(r.done) awardXP(r.xpAward, `✔ ${r.title}`);
-    else addLog(`☐ ${r.title} — undone`);
-    render(); save();
-  }
-
-  function setMode(m){
-    state.mode = m;
-    addLog(`∷ Mode → ${m}`);
-    render(); save();
-  }
-  function setGlyph(g){
-    state.glyph = g;
-    addLog(`◐ Glyph → ${g}`);
-    render(); save();
-  }
-
-  function handleCommand(raw){
-    const text = raw.trim();
-    if(!text) return;
-    if(text.startsWith("/mode ")){
-      const m = text.split(" ")[1];
-      if(["🕳️","♾️","🔆"].includes(m)) setMode(m);
-      else addLog(`? Unknown mode: ${m}`);
-    }else if(text.startsWith("/glyph ")){
-      const g = text.split(" ")[1];
-      if(["•","∣","◯","⊙","∿"].includes(g)) setGlyph(g);
-      else addLog(`? Unknown glyph: ${g}`);
-    }else if(text.startsWith("/xp ")){
-      const parts = text.replace("/xp ","").split(/\s+/);
-      const delta = {};
-      parts.forEach(p=>{
-        const mt = p.match(/(HP|CP|MP|DP)\+(\d+)/);
-        if(mt) delta[mt[1]] = parseInt(mt[2],10);
-      });
-      if(Object.keys(delta).length) { awardXP(delta, "manual"); render(); save(); }
-      else addLog("? No XP parsed");
-    }else if(text === "/reset"){
-      state.rituals.forEach(r=>r.done=false);
-      addLog("↺ HUD soft reset (rituals/log)");
-      state.log = state.log.slice(0,200);
-      render(); save();
-    }else{
-      addLog(text); render(); save();
-    }
-    $cmd.value = "";
-  }
-
-  function exportJSON(){
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `symbolfield_hud_${state.date}.json`; a.click();
-    URL.revokeObjectURL(url);
-  }
-  function importJSON(file){
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try {
-        const data = JSON.parse(String(reader.result));
-        state = data;
-        addLog("⬑ Imported state JSON");
-        render(); save();
-      }catch{ addLog("! Import failed"); render(); }
-    };
-    reader.readAsText(file);
-  }
-
-  // wiring
-  document.getElementById("m_shadow").onclick = ()=>setMode("🕳️");
-  document.getElementById("m_flow").onclick = ()=>setMode("♾️");
-  document.getElementById("m_radiance").onclick = ()=>setMode("🔆");
-
-  document.getElementById("g_dot").onclick = ()=>setGlyph("•");
-  document.getElementById("g_bar").onclick = ()=>setGlyph("∣");
-  document.getElementById("g_circle").onclick = ()=>setGlyph("◯");
-  document.getElementById("g_core").onclick = ()=>setGlyph("⊙");
-  document.getElementById("g_drift").onclick = ()=>setGlyph("∿");
-
-  document.getElementById("qa_shadow").onclick = ()=>setMode("🕳️");
-  document.getElementById("qa_flow").onclick = ()=>setMode("♾️");
-  document.getElementById("qa_radiance").onclick = ()=>setMode("🔆");
-  document.getElementById("qa_core").onclick = ()=>setGlyph("⊙");
-  document.getElementById("qa_drift").onclick = ()=>setGlyph("∿");
-  document.getElementById("qa_allxp").onclick = ()=>{ awardXP({HP:3,CP:3,MP:3,DP:3}, "quick"); render(); save(); };
-
-  document.getElementById("reset_btn").onclick = ()=>{ state = load(); render(); save(); };
-
-  document.getElementById("run").onclick = ()=>handleCommand($cmd.value);
-  $cmd.addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleCommand($cmd.value); });
-
-  document.getElementById("export_json").onclick = exportJSON;
-  document.getElementById("import_json").addEventListener("change", (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(file) importJSON(file);
+  static XP_SYMBOLS={HP:"🪨",CP:"💧",MP:"🔥",DP:"🌬️"};
+  static XP=Object.freeze({HP:15,CP:3,MP:3,DP:29});
+  static STORAGE_KEY="symbolFieldHUDState";
+  static DEFAULT_STATE=Object.freeze({
+    lang:"ru",
+    mode:SymbolFieldHUD.MODES[1],
+    mood:SymbolFieldHUD.MOODS[2],
+    glyph:SymbolFieldHUD.GLYPHS[2],
+    theme:SymbolFieldHUD.THEMES[0]
   });
 
-  function progressRow(label,key,icon){
-    const val = state.xp[key]||0;
-    const pct = Math.min(100, val % 100);
-    return (`
-      <div class="mt8">
-        <div class="between">
-          <div class="row"><strong>${key}</strong><span>${icon}</span></div>
-          <span class="mono">${val}</span>
-        </div>
-        <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
-      </div>
-    `);
+  constructor(){
+    this.dom={
+      body:document.body,
+      stateTitle:document.getElementById("t_state"),
+      xpTitle:document.getElementById("t_xp"),
+      xpPanel:document.getElementById("xp"),
+      modeHint:document.getElementById("mode_hint"),
+      moodHint:document.getElementById("mood_hint"),
+      log:document.getElementById("log"),
+      theme:document.getElementById("theme"),
+      lang:document.getElementById("lang"),
+      dateMoon:document.getElementById("dateMoon")
+    };
+    this.storage=this.safeStorage();
+    this.state=this.loadState();
+    this.bindEventHandlers();
+    this.render();
+    this.updateMoon();
   }
 
-  function render(){
-    $date.textContent = state.date;
-    $mode_hint.textContent = modeHints[state.mode] || "";
-    // highlight current mode/glyph
-    document.querySelectorAll('[id^="m_"],[id^="g_"]').forEach(b=>b.removeAttribute("aria-current"));
-    ({ "🕳️":"m_shadow","♾️":"m_flow","🔆":"m_radiance" }[state.mode] && document.getElementById({ "🕳️":"m_shadow","♾️":"m_flow","🔆":"m_radiance" }[state.mode]).setAttribute("aria-current","true"));
-    ({ "•":"g_dot","∣":"g_bar","◯":"g_circle","⊙":"g_core","∿":"g_drift" }[state.glyph] && document.getElementById({ "•":"g_dot","∣":"g_bar","◯":"g_circle","⊙":"g_core","∿":"g_drift" }[state.glyph]).setAttribute("aria-current","true"));
-
-    // XP
-    $xp_list.innerHTML = [
-      progressRow("HP","HP","🪨"),
-      progressRow("CP","CP","💧"),
-      progressRow("MP","MP","🔥"),
-      progressRow("DP","DP","🌬️"),
-    ].join("");
-    $xp_total.textContent = (state.xp.HP+state.xp.CP+state.xp.MP+state.xp.DP);
-
-    // Rituals
-    $rituals.innerHTML = state.rituals.map(r=>`
-      <div class="item ${r.done?'ok':''}">
-        <div class="row">
-          <button class="btn small" onclick="__toggle('${r.id}')">${r.done?'★':'✦'}</button>
-          <div>
-            <div><strong>${r.emoji} ${r.title}</strong></div>
-            <div class="hint">award: ${Object.entries(r.xpAward).map(([k,v])=>k+"+"+v).join(" ")}</div>
-          </div>
-        </div>
-        <span class="badge">${r.schedule}</span>
-      </div>
-    `).join("");
-
-    // Log
-    $log.innerHTML = state.log.map(it=>`
-      <div class="item"><div class="mono">[${new Date(it.ts).toLocaleTimeString()}] ${it.text}</div></div>
-    `).join("");
+  safeStorage(){
+    try{return window.localStorage;}catch{return null;}
   }
 
-  // expose small bridge for onclick
-  window.__toggle = toggleRitual;
+  loadState(){
+    const base={...SymbolFieldHUD.DEFAULT_STATE};
+    if(!this.storage)return base;
+    try{
+      const raw=this.storage.getItem(SymbolFieldHUD.STORAGE_KEY)||"{}";
+      const parsed=JSON.parse(raw);
+      if(!parsed||typeof parsed!=="object")return this.applyLegacyLang(base);
+      const validators={
+        lang:value=>Boolean(SymbolFieldHUD.TEXT[value]),
+        mode:value=>SymbolFieldHUD.MODES.includes(value),
+        mood:value=>SymbolFieldHUD.MOODS.includes(value),
+        glyph:value=>SymbolFieldHUD.GLYPHS.includes(value),
+        theme:value=>SymbolFieldHUD.THEMES.includes(value)
+      };
+      for(const key of Object.keys(base)){
+        const candidate=parsed[key];
+        if(typeof candidate==="string"&&validators[key]?.(candidate)){
+          base[key]=candidate;
+        }
+      }
+      return this.applyLegacyLang(base);
+    }catch{
+      return this.applyLegacyLang(base);
+    }
+  }
 
-  render(); save();
-})();
+  applyLegacyLang(state){
+    if(!this.storage)return state;
+    const storedLang=this.storage.getItem("lang");
+    if(storedLang&&SymbolFieldHUD.TEXT[storedLang]){
+      state.lang=storedLang;
+    }
+    return state;
+  }
+
+  saveState(){
+    if(!this.storage)return;
+    try{
+      this.storage.setItem(SymbolFieldHUD.STORAGE_KEY,JSON.stringify(this.state));
+      this.storage.setItem("lang",this.state.lang);
+    }catch{
+      /* ignore quota errors */
+    }
+  }
+
+  bindEventHandlers(){
+    this.attachGroupHandlers("mode","∷ Mode → ");
+    this.attachGroupHandlers("mood","♦ Mood → ");
+    this.attachGroupHandlers("glyph","◐ Glyph → ");
+
+    this.dom.theme?.addEventListener("change",event=>{
+      const value=event.target.value;
+      this.setState({theme:value},`☼ Theme → ${value}`);
+    });
+
+    this.dom.lang?.addEventListener("change",event=>{
+      const value=event.target.value;
+      this.setState({lang:value});
+      this.updateMoon();
+    });
+  }
+
+  attachGroupHandlers(key,logPrefix){
+    document.querySelectorAll(`[data-${key}]`).forEach(button=>{
+      button.addEventListener("click",()=>{
+        const value=button.dataset[key];
+        if(!value)return;
+        this.setState({[key]:value},`${logPrefix}${value}`);
+      });
+    });
+  }
+
+  setState(patch,logMessage){
+    const next={...this.state,...patch};
+    const changed=Object.keys(patch).some(key=>this.state[key]!==next[key]);
+    this.state=next;
+    if(changed){
+      this.saveState();
+      this.render();
+      if(logMessage){
+        this.log(logMessage);
+      }
+    }
+  }
+
+  render(){
+    const {mode,mood,theme,lang}=this.state;
+    this.dom.body.dataset.mode=mode;
+    this.dom.body.dataset.mood=mood;
+    this.dom.body.dataset.theme=theme==="status"?mode:theme;
+
+    const text=SymbolFieldHUD.TEXT[lang]||SymbolFieldHUD.TEXT.ru;
+    this.dom.stateTitle.textContent=text.state;
+    this.dom.xpTitle.textContent=text.xp;
+    this.dom.modeHint.textContent=SymbolFieldHUD.MODE_HINTS[mode]||"";
+    this.dom.moodHint.textContent=SymbolFieldHUD.MOOD_HINTS[mood]||"";
+
+    if(this.dom.lang)this.dom.lang.value=lang;
+    if(this.dom.theme)this.dom.theme.value=theme;
+
+    this.markSelection("mode");
+    this.markSelection("mood");
+    this.markSelection("glyph");
+
+    this.renderXp();
+  }
+
+  markSelection(key){
+    document.querySelectorAll(`[data-${key}]`).forEach(btn=>{
+      const value=btn.dataset[key];
+      if(!value)return;
+      btn.toggleAttribute("aria-current",value===this.state[key]);
+    });
+  }
+
+  renderXp(){
+    if(!this.dom.xpPanel)return;
+    this.dom.xpPanel.textContent="";
+    const frag=document.createDocumentFragment();
+    for(const [label,value] of Object.entries(SymbolFieldHUD.XP)){
+      const wrapper=document.createElement("div");
+      wrapper.className="mt8";
+
+      const row=document.createElement("div");
+      row.className="row";
+      const strong=document.createElement("strong");
+      strong.textContent=label;
+      const icon=document.createElement("span");
+      icon.textContent=SymbolFieldHUD.XP_SYMBOLS[label]||"";
+      const amount=document.createElement("span");
+      amount.className="mono";
+      amount.textContent=String(value);
+      row.append(strong,icon,amount);
+
+      const progress=document.createElement("div");
+      progress.className="progress";
+      const bar=document.createElement("div");
+      bar.className="bar";
+      bar.style.width=`${Math.min(100,value%100)}%`;
+      progress.append(bar);
+
+      wrapper.append(row,progress);
+      frag.append(wrapper);
+    }
+    this.dom.xpPanel.append(frag);
+  }
+
+  log(message){
+    if(!this.dom.log)return;
+    const entry=document.createElement("div");
+    entry.className="item mono";
+    entry.textContent=`[${new Date().toLocaleTimeString()}] ${message}`;
+    this.dom.log.prepend(entry);
+    while(this.dom.log.children.length>50){
+      this.dom.log.removeChild(this.dom.log.lastElementChild);
+    }
+  }
+
+  async updateMoon(){
+    if(!this.dom.dateMoon)return;
+    const now=Math.floor(Date.now()/1000);
+    try{
+      const res=await fetch(`https://api.farmsense.net/v1/moonphases/?d=${now}`);
+      const data=await res.json();
+      const phase=data?.[0]?.Phase||"unknown";
+      let icon="🌘",quarter=4;
+      if(phase.includes("New")){icon="🌑";quarter=1;}
+      else if(phase.includes("Waxing Crescent")){icon="🌒";quarter=1;}
+      else if(phase.includes("First Quarter")){icon="🌓";quarter=2;}
+      else if(phase.includes("Waxing Gibbous")){icon="🌔";quarter=2;}
+      else if(phase.includes("Full")){icon="🌕";quarter=3;}
+      else if(phase.includes("Waning Gibbous")){icon="🌖";quarter=3;}
+      else if(phase.includes("Last Quarter")){icon="🌗";quarter=4;}
+      else if(phase.includes("Waning Crescent")){icon="🌘";quarter=4;}
+      const locale=this.state.lang==="ru"?"ru-RU":"en-GB";
+      const dateStr=new Date().toLocaleDateString(locale,{
+        day:"numeric",month:"long",year:"numeric"
+      });
+      this.dom.dateMoon.textContent=`${dateStr} · ${icon} ${phase} · Q${quarter}`;
+    }catch{
+      this.dom.dateMoon.textContent="Moon API unavailable";
+    }
+  }
+}
+
+new SymbolFieldHUD();
 </script>
 </body>
 </html>
