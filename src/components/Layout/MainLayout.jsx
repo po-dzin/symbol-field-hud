@@ -4,7 +4,7 @@ import NavRail from '../HUD/NavRail';
 import GraphCanvas from '../Canvas/GraphCanvas';
 import WindowFrame from '../HUD/WindowFrame';
 import AgentWindow from '../Modules/AgentWindow';
-import DetailWindow from '../Modules/DetailWindow';
+
 import StatePanel from '../HUD/StatePanel'; // Import StatePanel
 import TimeSpiral from '../HUD/TimeSpiral'; // Import TimeSpiral
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
@@ -108,20 +108,10 @@ const MainLayout = () => {
                 <TimeSpiral />
                 <CoreWidget />
 
-                {/* Layer 4: Floating Windows (Legacy/Detail support) */}
-                <div id="window-layer" className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-                    {/* {Object.values(windows).map(win => (
-                        <WindowFrame
-                            key={win.id}
-                            id={win.id}
-                            title={win.title}
-                            glyph={win.glyph}
-                            initialPosition={win.position}
-                        >
-                            {win.id === 'agent' ? <AgentWindow /> : <DetailWindow node={win} />}
-                        </WindowFrame>
-                    ))} */}
-                </div>
+                {/* Layer 4: Floating Windows (Legacy/Detail support) - REMOVED */}
+                {/* The window-layer div has been removed as part of the v0.2 refactor. 
+                    DetailWindow and floating window logic are no longer used in MainLayout. 
+                */}
 
                 {/* Dock - Bottom/Right (Removed/Replaced by TimeSpiral) */}
                 {/* <Dock /> */}
