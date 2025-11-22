@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: theme('colors.os-text-primary');
+  background-color: theme('colors.os-dark');
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 50%, #1a1a24 0%, #0a0a0c 100%);
+  overflow: hidden;
+  /* App-like feel */
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  @apply bg-os-glass-bg backdrop-blur-xl border border-os-glass-border rounded-2xl;
+}
+
+.glass-panel-hover {
+  @apply transition-colors duration-300;
+}
+
+.glass-panel-hover:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.os-glass-border');
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.os-text-meta');
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px theme('colors.os-cyan-dim');
+  }
+
+  50% {
+    box-shadow: 0 0 40px theme('colors.os-cyan-dim');
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
