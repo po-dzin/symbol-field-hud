@@ -6,10 +6,19 @@ import NPCore from './NPCore';
 import XPMandala from './XPMandala';
 import { mockNodes, mockEdges } from '../../data/mockGraph';
 import { useWindowStore } from '../../store/windowStore';
+import { useStateStore } from '../../store/stateStore';
 
 const GraphCanvas = () => {
     const containerRef = useRef(null);
     const { openWindow, xpState, isCoreActive, createCore } = useWindowStore();
+    const { mode } = useStateStore();
+
+    // Adaptive grid color based on mode (warmer, less bright)
+    const gridColor = mode === 'LUMA' ? 'rgba(120, 110, 95, 0.25)' : '#5a5654'; // Warm neutral for LUMA
+    const gridOpacity = mode === 'LUMA' ? 1 : 0.35; // Opacity handled in color string for LUMA
+
+    // Axis colors for better visibility (v0.309.2 - increased DEEP contrast)
+    const axisColor = mode === 'LUMA' ? '#5b5349' : mode === 'DEEP' ? 'rgba(170, 190, 205, 0.35)' : 'rgba(180, 200, 210, 0.28)';
 
     // Spring for pan/zoom
     const [{ x, y, scale }, api] = useSpring(() => ({
@@ -66,13 +75,14 @@ const GraphCanvas = () => {
     };
 
     return (
-        <div ref={containerRef} className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing bg-os-dark relative">
+        <div ref={containerRef} className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing bg-transparent relative">
             {/* Background Grid */}
             <div
-                className="absolute inset-0 opacity-20 pointer-events-none"
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                    backgroundImage: 'radial-gradient(circle, #333 1px, transparent 1px)',
-                    backgroundSize: '40px 40px'
+                    backgroundImage: `radial-gradient(circle, ${gridColor} 1px, transparent 1px)`,
+                    backgroundSize: '40px 40px',
+                    opacity: gridOpacity
                 }}
             />
 
@@ -81,16 +91,16 @@ const GraphCanvas = () => {
                 style={{ x, y, scale }}
             >
                 {/* Connecting Lines (Axes) */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
                     <g style={{ transform: 'translate(50%, 50%)' }}> {/* Center origin using CSS transform */}
                         {/* We need to calculate line ends based on current XP positions */}
                         {/* This is a bit tricky in SVG inside a centered div, but let's try relative coords */}
                         {/* Actually, since we are centering the content, 0,0 is the center of the animated div */}
 
-                        <line x1="0" y1="0" x2={getAxisPosition('SP', xpState.sp).x} y2={getAxisPosition('SP', xpState.sp).y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-                        <line x1="0" y1="0" x2={getAxisPosition('HP', xpState.hp).x} y2={getAxisPosition('HP', xpState.hp).y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-                        <line x1="0" y1="0" x2={getAxisPosition('EP', xpState.ep).x} y2={getAxisPosition('EP', xpState.ep).y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-                        <line x1="0" y1="0" x2={getAxisPosition('MP', xpState.mp).x} y2={getAxisPosition('MP', xpState.mp).y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                        <line x1="0" y1="0" x2={getAxisPosition('SP', xpState.sp).x} y2={getAxisPosition('SP', xpState.sp).y} stroke={axisColor} strokeWidth="1" />
+                        <line x1="0" y1="0" x2={getAxisPosition('HP', xpState.hp).x} y2={getAxisPosition('HP', xpState.hp).y} stroke={axisColor} strokeWidth="1" />
+                        <line x1="0" y1="0" x2={getAxisPosition('EP', xpState.ep).x} y2={getAxisPosition('EP', xpState.ep).y} stroke={axisColor} strokeWidth="1" />
+                        <line x1="0" y1="0" x2={getAxisPosition('MP', xpState.mp).x} y2={getAxisPosition('MP', xpState.mp).y} stroke={axisColor} strokeWidth="1" />
                     </g>
                 </svg>
 
@@ -112,10 +122,10 @@ const GraphCanvas = () => {
                 {/* XP Mandala Nodes */}
                 {isCoreActive && (
                     <>
-                        <XPMandala type="SP" value={xpState.sp} glyph="🌬️" color="os-text-primary" position={getAxisPosition('SP', xpState.sp)} />
-                        <XPMandala type="HP" value={xpState.hp} glyph="🪨" color="os-green" position={getAxisPosition('HP', xpState.hp)} />
-                        <XPMandala type="EP" value={xpState.ep} glyph="💧" color="os-cyan" position={getAxisPosition('EP', xpState.ep)} />
-                        <XPMandala type="MP" value={xpState.mp} glyph="🔥" color="os-amber" position={getAxisPosition('MP', xpState.mp)} />
+                        <XPMandala type="SP" value={xpState.sp} glyph="🌬️" color="os-sp" glowColor="#ededeb" position={getAxisPosition('SP', xpState.sp)} />
+                        <XPMandala type="HP" value={xpState.hp} glyph="🪨" color="os-hp" glowColor="#8fefac" position={getAxisPosition('HP', xpState.hp)} />
+                        <XPMandala type="EP" value={xpState.ep} glyph="💧" color="os-ep" glowColor="#67e8f9" position={getAxisPosition('EP', xpState.ep)} />
+                        <XPMandala type="MP" value={xpState.mp} glyph="🔥" color="os-mp" glowColor="#fdba74" position={getAxisPosition('MP', xpState.mp)} />
                     </>
                 )}
             </animated.div>

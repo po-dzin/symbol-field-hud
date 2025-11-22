@@ -5,10 +5,16 @@ export const useWindowStore = create((set) => ({
     windows: {}, // { [id]: { id, title, glyph, isOpen, isMinimized, zIndex, position } }
     activeWindowId: null,
     nextZIndex: 100,
+    dockZIndex: 50, // Initial dock z-index
+
+    focusDock: () => set((state) => ({
+        dockZIndex: state.nextZIndex,
+        nextZIndex: state.nextZIndex + 1,
+        activeWindowId: null // Optional: deselect window when dock is focused? Or keep active? User said "click dock -> above window".
+    })),
 
     // Spec v0.2 State
     activeTab: 'HUD', // HUD, Graph, Log, Agent, Settings
-    coreMode: 'PRISM', // PRISM (Rainbow) or VOID (Blackhole)
     xpState: {
         hp: 50, // 🪨
         ep: 50, // 💧
@@ -22,7 +28,6 @@ export const useWindowStore = create((set) => ({
     },
 
     setActiveTab: (tab) => set({ activeTab: tab }),
-    setCoreMode: (mode) => set({ coreMode: mode }),
     updateXP: (type, value) => set((state) => ({
         xpState: { ...state.xpState, [type]: value }
     })),

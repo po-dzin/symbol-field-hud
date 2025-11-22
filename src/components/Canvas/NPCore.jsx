@@ -1,16 +1,27 @@
-import React from 'react';
+import { useStateStore, TONES } from '../../store/stateStore';
 import { useWindowStore } from '../../store/windowStore';
 
 const NPCore = () => {
     const { coreMode, xpState, isCoreMinimized, toggleCoreMinimize, timeSpiralState, deleteCore } = useWindowStore();
-    const { np } = xpState;
-    const { breathPhase } = timeSpiralState; // We might need actual breath value here, but for now let's use CSS animation
+    const { toneId } = useStateStore();
+    const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
+    const { hp, ep, mp, sp, np } = xpState;
+    const { breathPhase } = timeSpiralState;
+
+    const { mode } = useStateStore();
 
     // If minimized, we might still show a ghost or nothing. Let's hide it for now as it moves to HUD.
     if (isCoreMinimized) return null;
 
+    // Helper to convert hex to RGB
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
+    };
+
     // Visual styles based on mode
     const isPrism = coreMode === 'PRISM';
+    const isLuma = mode === 'LUMA';
 
     // Dynamic styles based on NP value
     const pulseSpeed = Math.max(1, 5 - (np / 25)); // Faster pulse with higher NP
@@ -33,31 +44,63 @@ const NPCore = () => {
                 <span className="text-[10px] text-white">↘</span>
             </button>
 
-            {/* Outer Bloom */}
-            <div className={`absolute inset-0 rounded-full blur-2xl transition-all duration-1000
-                ${isPrism
-                    ? 'bg-gradient-to-tr from-os-cyan via-os-violet to-os-amber opacity-40'
-                    : 'bg-black shadow-[inset_0_0_40px_rgba(0,0,0,1)] opacity-80'
-                }
-            `} />
+            {/* OUTER GLOW - Intense Rainbow Halo */}
+            <div
+                className="absolute inset-[-30%] rounded-full z-0"
+                style={{
+                    background: `
+                        conic-gradient(from 0deg, 
+                            rgba(${hexToRgb('#75cdcd')}, 0.4) 0deg,    /* SP - Cyan */
+                            rgba(${hexToRgb('#75cd75')}, 0.4) 90deg,   /* MP - Mint */
+                            rgba(${hexToRgb('#cd8475')}, 0.4) 180deg,  /* HP - Coral */
+                            rgba(${hexToRgb('#cdab75')}, 0.4) 270deg,  /* EP - Sand */
+                            rgba(${hexToRgb('#75cdcd')}, 0.4) 360deg   /* SP - Cyan */
+                        )
+                    `,
+                    filter: 'blur(20px)',
+                    opacity: 1,
+                    animation: 'breathingCrown 6s ease-in-out infinite' // Faster pulse
+                }}
+            />
 
-            {/* Core Shape */}
-            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-1000
-                ${isPrism
-                    ? 'bg-white/10 backdrop-blur-md border border-white/30 shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                    : 'bg-black border border-os-glass-border shadow-[inset_0_0_20px_rgba(0,0,0,1)]'
-                }
-            `}>
+            {/* NP CORE or VOID - PURE BLACK CENTER WITH RAINBOW EDGE */}
+            <div
+                onClick={toggleCoreMinimize}
+                className={`
+                    relative z-20 flex items-center justify-center w-20 h-20 rounded-full cursor-pointer
+                    transition-all duration-700 ease-in-out group-hover:scale-105
+                    bg-black
+                    animate-pulse-glow
+                `}
+                style={{
+                    boxShadow: 'inset 0 0 20px rgba(0,0,0,1)', // Inner shadow for depth
+                    // RAINBOW EDGE IMPLEMENTATION:
+                    border: '3px solid transparent',
+                    background: `
+                        linear-gradient(black, black) padding-box,
+                        conic-gradient(from 0deg, 
+                            #75cdcd, /* SP */
+                            #75cd75, /* MP */
+                            #cd8475, /* HP */
+                            #cdab75, /* EP */
+                            #75cdcd  /* SP */
+                        ) border-box
+                    `
+                }}
+            >
+
                 {/* Inner Glyph */}
                 <span className={`text-2xl transition-colors duration-500
-                    ${isPrism ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'text-os-text-meta'}
-                `}>
+                        ${isPrism
+                        ? isLuma ? 'text-[#2a2620]' : 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
+                        : 'text-os-text-meta'}`}
+                >
                     {isPrism ? '🌈' : '🕳'}
                 </span>
 
                 {/* Rotating Ring (Prism only) */}
                 {isPrism && (
-                    <div className="absolute inset-[-4px] rounded-full border border-white/20 animate-[spin_10s_linear_infinite]" />
+                    <div className={`absolute inset-[-4px] rounded-full border animate-[spin_10s_linear_infinite] ${isLuma ? 'border-[#5b5349]/30' : 'border-white/20'}`} />
                 )}
 
                 {/* Collapse Effect (Void only) */}
@@ -67,7 +110,7 @@ const NPCore = () => {
             </div>
 
             {/* Label */}
-            <div className="absolute -bottom-8 text-xs font-medium tracking-widest text-os-text-secondary opacity-60">
+            <div className="absolute -bottom-8 text-xs font-medium tracking-widest text-os-text-secondary opacity-75">
                 CORE // {isPrism ? 'PRISM' : 'VOID'}
             </div>
         </div>
