@@ -15,10 +15,13 @@ const WindowFrame = ({
     isStatic,
     style
 }) => {
-    const { focusWindow, minimizeWindow, closeWindow, setWindowPosition } = useWindowStore();
+    const { focusWindow, minimizeWindow, closeWindow, setWindowPosition, toggleWindowPin, windows } = useWindowStore();
     const { toneId } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const nodeRef = useRef(null);
+
+    const windowState = windows[id] || {};
+    const isPinned = windowState.isPinned;
 
     // Use provided position, or initial, or default
     const activePosition = position || initialPosition || { x: 0, y: 0 };
@@ -45,7 +48,7 @@ const WindowFrame = ({
                 '--glow-color': `${currentTone.color}60`,
                 borderColor: `${currentTone.color}60`,
                 backgroundColor: `${currentTone.color}02`,
-                animation: 'pulse-glow-soft 4s infinite ease-in-out',
+                animation: 'pulse-glow-smooth 8s ease-in-out infinite',
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 boxShadow: `0 0 20px ${currentTone.color}40, 0 4px 12px rgba(0,0,0,0.3)`,
@@ -54,7 +57,7 @@ const WindowFrame = ({
             onClick={() => focusWindow(id)}
         >
             {/* Header / Handle */}
-            <div className="window-handle h-10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing border-b border-os-glass-border/50 select-none">
+            <div className={`window-handle h-10 flex items-center justify-between px-4 border-b border-os-glass-border/50 select-none ${isPinned ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}>
                 <div className="flex items-center gap-2">
                     <span className="text-os-cyan">
                         {glyph === '𓂀' ? (
@@ -69,6 +72,13 @@ const WindowFrame = ({
                 {/* Controls */}
                 {!isStatic && (
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); toggleWindowPin(id); }}
+                            className={`w-3 h-3 rounded-full flex items-center justify-center transition-all ${isPinned ? 'bg-os-cyan opacity-100' : 'bg-white/20 opacity-50 hover:opacity-100'}`}
+                            title={isPinned ? "Unpin" : "Pin"}
+                        >
+                            {isPinned && <div className="w-1 h-1 bg-black rounded-full" />}
+                        </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
                             className="w-3 h-3 rounded-full bg-os-amber opacity-50 hover:opacity-100 transition-opacity"
@@ -96,13 +106,14 @@ const WindowFrame = ({
 
     return (
         <Draggable
-            handle=".window-handle" // Changed handle to .window-handle
+            handle=".window-handle"
             nodeRef={nodeRef}
             defaultPosition={initialPosition}
             position={position || initialPosition}
             onStart={handleStart}
             onStop={handleStop}
             onMouseDown={() => focusWindow(id)}
+            disabled={isPinned}
         >
             {content}
         </Draggable>

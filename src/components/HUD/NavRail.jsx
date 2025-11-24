@@ -48,13 +48,15 @@ const NavRail = () => {
 
     return (
         <nav
-            className="absolute right-6 top-1/2 -translate-y-1/2 w-[72px] py-6 
+            className="absolute left-6 top-1/2 -translate-y-1/2 w-[72px] py-6 
             backdrop-blur-xl flex flex-col items-center justify-center gap-4 transition-all duration-200"
             style={{
                 background: 'var(--surface-1-bg)',
                 border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                 borderRadius: 'var(--panel-radius)',
                 boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
+                animation: 'pulse-glow-smooth 8s ease-in-out infinite',
+                '--glow-color': `${activeColor}60`,
                 zIndex: dockZIndex,
                 height: 'min(320px, 60vh)'
             }}

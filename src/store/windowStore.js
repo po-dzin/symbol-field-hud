@@ -35,6 +35,16 @@ export const useWindowStore = create((set) => ({
         timeSpiralState: { ...state.timeSpiralState, expanded: !state.timeSpiralState.expanded }
     })),
 
+    toggleWindowPin: (id) => set((state) => ({
+        windows: {
+            ...state.windows,
+            [id]: {
+                ...state.windows[id],
+                isPinned: !state.windows[id].isPinned
+            }
+        }
+    })),
+
     isCoreMinimized: false,
     coreStatus: 'SOURCE', // 'SOURCE' | 'EXIST'
 

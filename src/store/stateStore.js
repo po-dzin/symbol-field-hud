@@ -29,7 +29,7 @@ export const GLYPHS = [
 
 export const useStateStore = create((set) => ({
     mode: 'FLOW', // DEEP, FLOW, LUMA
-    toneId: 'turquoise',
+    toneId: 'sky',
     glyphId: 'triad',
     timeScale: 'WEEK', // DAY, WEEK, MONTH, YEAR
 

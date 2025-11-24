@@ -55,7 +55,9 @@ const TimeSpiral = () => {
                     background: 'var(--surface-1-bg)',
                     border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                     borderRadius: 'var(--panel-radius)',
-                    boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`
+                    boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
+                    animation: 'pulse-glow-smooth 8s ease-in-out infinite',
+                    '--glow-color': `${activeColor}60`
                 }}
             >
                 {/* Collapsed Content */}

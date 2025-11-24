@@ -29,26 +29,26 @@ const ModePill = ({ modeKey, active, onClick, accentColor, mode }) => {
             title={`${modeData.label} Mode`}
             className={`
                 inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full transition-all duration-300
-                ${active ? '' : 'hover:bg-white/5'}
+                ${active ? '' : (mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5')}
             `}
             style={active ? {
                 background: isLuma
                     ? `rgba(235,225,210,0.95)`
                     : `rgba(0,0,0,0.9)`,
-                border: `1.5px solid rgba(${accentRGB}, 0.9)`,
+                border: `1.5px solid rgba(${accentRGB}, 0.7)`,
                 boxShadow: `0 0 14px rgba(${accentRGB}, 0.7)`,
                 color: isLuma ? 'var(--neutralTextLuma, #2A2620)' : '#FFFFFF',
                 textShadow: 'none'
             } : {
                 background: 'transparent',
                 border: '1.5px solid transparent',
-                color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)'
+                color: hover ? (mode === 'LUMA' ? '#2A2620' : '#FFFFFF') : (mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)')
             }}
         >
             <span className="text-lg inline-flex items-center justify-center leading-none">
                 {modeData.icon}
             </span>
-            <span className="text-xs font-bold uppercase tracking-widest leading-none">
+            <span className="text-xs font-bold uppercase tracking-widest leading-none mt-0.5">
                 {modeData.label}
             </span>
         </button>
@@ -86,7 +86,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
 
             {isOpen && (
                 <div className={`absolute top-full mt-4 left-1/2 -translate-x-1/2 backdrop-blur-xl border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50
-                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/10' : 'bg-os-dark-blue/95 border-os-glass-border'}
+                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/5' : 'bg-os-dark-blue/95 border-white/10'}
                 `}>
                     {TONES.map(tone => {
                         const toneDisplayColor = mode === 'LUMA' ? tone.lumaColor : tone.color;
@@ -165,7 +165,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
 
             {isOpen && (
                 <div className={`absolute top-full mt-4 left-1/2 -translate-x-1/2 backdrop-blur-xl border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50
-                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/10' : 'bg-os-dark-blue/95 border-os-glass-border'}
+                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/5' : 'bg-os-dark-blue/95 border-white/10'}
                 `}>
                     {GLYPHS.map(glyph => (
                         <button
@@ -215,7 +215,9 @@ const StatePanel = () => {
                     background: 'var(--surface-1-bg)',
                     border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                     borderRadius: 'var(--panel-radius)',
-                    boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`
+                    boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
+                    animation: 'pulse-glow-smooth 8s ease-in-out infinite',
+                    '--glow-color': `${activeColor}60`
                 }}
             >
                 {/* MODE Group */}

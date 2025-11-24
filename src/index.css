@@ -208,6 +208,25 @@ body {
   }
 }
 
+/* Smooth 8s breath cycle - synchronized across all panels */
+@keyframes pulse-glow-smooth {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 5px var(--glow-color),
+      0 0 10px var(--glow-color);
+    opacity: 0.85;
+  }
+
+  50% {
+    box-shadow:
+      0 0 8px var(--glow-color),
+      0 0 14px var(--glow-color);
+    opacity: 1;
+  }
+}
+
 .animate-pulse-soft {
   animation: pulse-glow-soft 3s ease-in-out infinite;
 }
