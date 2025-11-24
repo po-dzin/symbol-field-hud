@@ -28,21 +28,16 @@ const NPCore = () => {
 
     return (
         <div className="relative flex items-center justify-center w-32 h-32 group">
-            {/* Delete Button (Visible on Hover) */}
+            {/* Delete Button (Visible on Hover) - Top Right X */}
             <button
                 onClick={(e) => { e.stopPropagation(); deleteCore(); }}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] text-os-text-secondary opacity-0 group-hover:opacity-100 hover:text-os-red transition-all z-50 uppercase tracking-wider"
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-black/50 border border-white/10 hover:bg-os-red/20 hover:border-os-red flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-50"
+                title="Dematerialize"
             >
-                Delete Core
+                <span className="text-[10px] text-os-text-secondary hover:text-os-red">✕</span>
             </button>
 
-            {/* Minimize Button (Visible on Hover) */}
-            <button
-                onClick={toggleCoreMinimize}
-                className="absolute -top-4 right-0 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
-            >
-                <span className="text-[10px] text-white">↘</span>
-            </button>
+            {/* Minimize Button REMOVED v0.327 */}
 
             {/* OUTER GLOW - Intense Rainbow Halo */}
             <div
@@ -65,12 +60,11 @@ const NPCore = () => {
 
             {/* NP CORE or VOID - PURE BLACK CENTER WITH RAINBOW EDGE */}
             <div
-                onClick={toggleCoreMinimize}
                 className={`
                     relative z-20 flex items-center justify-center w-20 h-20 rounded-full cursor-pointer
                     transition-all duration-700 ease-in-out group-hover:scale-105
                     bg-black
-                    animate-pulse-glow
+                    animate-materialize animate-pulse-glow
                 `}
                 style={{
                     boxShadow: 'inset 0 0 20px rgba(0,0,0,1)', // Inner shadow for depth

@@ -56,7 +56,13 @@ const WindowFrame = ({
             {/* Header / Handle */}
             <div className="window-handle h-10 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing border-b border-os-glass-border/50 select-none">
                 <div className="flex items-center gap-2">
-                    <span className="text-os-cyan">{glyph}</span>
+                    <span className="text-os-cyan">
+                        {glyph === '𓂀' ? (
+                            <span className="block text-lg -mt-0.5 transform scale-90 font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span>
+                        ) : (
+                            glyph
+                        )}
+                    </span>
                     <span className="text-xs font-medium tracking-wider text-os-text-primary">{title}</span>
                 </div>
 

@@ -33,11 +33,12 @@ const ModePill = ({ modeKey, active, onClick, accentColor, mode }) => {
             `}
             style={active ? {
                 background: isLuma
-                    ? `radial-gradient(circle, rgba(${accentRGB}, 0.20) 0%, rgba(235,225,210,0.95) 70%)`
-                    : `radial-gradient(circle, rgba(${accentRGB}, 0.12) 0%, rgba(0,0,0,0.9) 70%)`,
+                    ? `rgba(235,225,210,0.95)`
+                    : `rgba(0,0,0,0.9)`,
                 border: `1.5px solid rgba(${accentRGB}, 0.9)`,
                 boxShadow: `0 0 14px rgba(${accentRGB}, 0.7)`,
-                color: isLuma ? 'var(--neutralTextLuma, #2A2620)' : '#FFFFFF'
+                color: isLuma ? 'var(--neutralTextLuma, #2A2620)' : '#FFFFFF',
+                textShadow: 'none'
             } : {
                 background: 'transparent',
                 border: '1.5px solid transparent',
@@ -58,6 +59,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
     const [isOpen, setIsOpen] = useState(false);
     const currentTone = TONES.find(t => t.id === currentToneId) || TONES[0];
     const containerRef = useRef(null);
+    const isLuma = mode === 'LUMA';
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -74,7 +76,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Tone: ${currentTone.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
             >
                 <div
                     className="w-5 h-5 rounded-full shadow-sm border border-white/10"
@@ -83,7 +85,9 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-os-dark-blue/95 backdrop-blur-xl border border-os-glass-border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50">
+                <div className={`absolute top-full mt-4 left-1/2 -translate-x-1/2 backdrop-blur-xl border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50
+                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/10' : 'bg-os-dark-blue/95 border-os-glass-border'}
+                `}>
                     {TONES.map(tone => {
                         const toneDisplayColor = mode === 'LUMA' ? tone.lumaColor : tone.color;
                         return (
@@ -106,10 +110,11 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
     );
 };
 
-const GlyphSelector = ({ currentGlyphId, onSelect, accentColor }) => {
+const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
     const [isOpen, setIsOpen] = useState(false);
     const currentGlyph = GLYPHS.find(g => g.id === currentGlyphId) || GLYPHS[0];
     const containerRef = useRef(null);
+    const isLuma = mode === 'LUMA';
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -121,32 +126,62 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Helper to render glyphs with optical adjustments
+    const renderGlyph = (char, id, isMain = false) => {
+        const baseClass = isMain ? "text-2xl" : "text-xl";
+        const commonClasses = `${baseClass} w-full h-full flex items-center justify-center leading-none`;
+
+        if (id === 'eye') {
+            return <span className={`${commonClasses} -mt-0.5 transform scale-85 font-bold`} style={{ WebkitTextStroke: '0.5px currentColor' }}>{char}</span>;
+        }
+        if (id === 'triad') {
+            return <span className={`${commonClasses} -mt-1.5 font-bold transform scale-115`}>{char}</span>;
+        }
+        if (id === 'point') {
+            return <span className={`${commonClasses} transform scale-115`}>{char}</span>;
+        }
+        if (id === 'sun' || id === 'null') {
+            return <span className={`${commonClasses} -mt-0.5 transform scale-110`}>{char}</span>;
+        }
+        if (id === 'circle') {
+            return <span className={`${commonClasses} mt-0.5`}>{char}</span>;
+        }
+
+        return <span className={commonClasses}>{char}</span>;
+    };
+
     return (
         <div ref={containerRef} className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                title={`Current Glyph: ${currentGlyph.name}`}
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors cursor-pointer"
-                style={isOpen ? { backgroundColor: 'rgba(255,255,255,0.1)' } : {}}
+                title={`Current Glyph: ${currentGlyph.label}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+                style={isOpen ? { backgroundColor: isLuma ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)' } : {}}
             >
-                <span className="text-xl text-os-text-primary" style={{ color: isOpen ? accentColor : undefined }}>
-                    {currentGlyph.char}
-                </span>
+                <div className={`flex items-center justify-center w-full h-full ${isLuma ? 'text-[#2A2620]' : 'text-os-text-secondary'}`} style={{ color: isOpen ? accentColor : undefined }}>
+                    {renderGlyph(currentGlyph.char, currentGlyph.id, true)}
+                </div>
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-os-dark-blue/95 backdrop-blur-xl border border-os-glass-border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50">
+                <div className={`absolute top-full mt-4 left-1/2 -translate-x-1/2 backdrop-blur-xl border rounded-full p-2 flex items-center gap-2 shadow-2xl z-50
+                    ${isLuma ? 'bg-[#EBE1D2]/95 border-black/10' : 'bg-os-dark-blue/95 border-os-glass-border'}
+                `}>
                     {GLYPHS.map(glyph => (
                         <button
                             key={glyph.id}
                             onClick={() => { onSelect(glyph.id); setIsOpen(false); }}
-                            title={glyph.name}
-                            className={`w-8 h-8 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center text-lg
-                                ${glyph.id === currentGlyphId ? 'text-white font-bold' : 'text-os-text-secondary'}
+                            title={glyph.label}
+                            className={`w-8 h-8 rounded-full transition-colors flex items-center justify-center
+                                ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/10'}
+                                ${glyph.id === currentGlyphId
+                                    ? (isLuma ? 'text-[#2A2620] font-bold' : 'text-white font-bold')
+                                    : (isLuma ? 'text-[#5b5349]' : 'text-os-text-secondary')
+                                }
                             `}
                             style={glyph.id === currentGlyphId ? { color: accentColor } : {}}
                         >
-                            {glyph.char}
+                            {renderGlyph(glyph.char, glyph.id, false)}
                         </button>
                     ))}
                 </div>
@@ -199,12 +234,12 @@ const StatePanel = () => {
                     ))}
                 </div>
 
-                <div className="w-px h-8 bg-white/10" />
+                <div className={`w-px h-8 ${mode === 'LUMA' ? 'bg-black/10' : 'bg-white/10'}`} />
 
                 {/* TONE & GLYPH */}
                 <div className="flex items-center gap-2">
                     <ToneSelector currentToneId={toneId} onSelect={setTone} accentColor={activeColor} mode={mode} />
-                    <GlyphSelector currentGlyphId={glyphId} onSelect={setGlyph} accentColor={activeColor} />
+                    <GlyphSelector currentGlyphId={glyphId} onSelect={setGlyph} accentColor={activeColor} mode={mode} />
                 </div>
 
                 {/* Removed Duplicate Settings Dot */}

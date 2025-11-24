@@ -41,7 +41,7 @@ const XpSummaryPanel = () => {
                     <XpRow label="EP" value={ep} icon="💧" color={mode === 'LUMA' ? '#9c7b4f' : '#cdab75'} />
                     <XpRow label="MP" value={mp} icon="🔥" color={mode === 'LUMA' ? '#4f9c4f' : '#75cd75'} />
                     <XpRow label="SP" value={sp} icon="🌬️" color={mode === 'LUMA' ? '#328a8a' : '#75cdcd'} />
-                    <XpRow label="NP" value={np} icon="👁" color={mode === 'LUMA' ? '#6a4f9c' : '#8e75cd'} />
+                    <XpRow label="NP" value={np} icon="🌈" color={mode === 'LUMA' ? '#6a4f9c' : '#8e75cd'} />
                 </div>
             </div>
         </div>
@@ -52,9 +52,9 @@ const XpRow = ({ label, value, icon, color }) => {
     const tooltips = {
         'HP': 'Health Points',
         'EP': 'Energy Points',
-        'MP': 'Mana Points',
+        'MP': 'Mind Points',
         'SP': 'Spirit Points',
-        'NP': 'Nexus Points'
+        'NP': 'Nothing Points'
     };
 
     return (

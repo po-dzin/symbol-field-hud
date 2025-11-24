@@ -227,3 +227,27 @@ body {
     box-shadow: inset 0 0 20px black, 0 0 20px rgba(117, 205, 205, 0.6);
   }
 }
+
+@keyframes materialize {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+    filter: blur(20px);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+    filter: blur(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-materialize {
+  animation: materialize 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

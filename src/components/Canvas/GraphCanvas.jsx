@@ -4,14 +4,17 @@ import { useGesture } from '@use-gesture/react';
 import Node from './Node';
 import NPCore from './NPCore';
 import XPMandala from './XPMandala';
+import Source from './Source';
 import { mockNodes, mockEdges } from '../../data/mockGraph';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore } from '../../store/stateStore';
 
 const GraphCanvas = () => {
     const containerRef = useRef(null);
-    const { openWindow, xpState, isCoreActive, createCore } = useWindowStore();
+    const { openWindow, xpState, coreStatus } = useWindowStore();
     const { mode } = useStateStore();
+
+    const isCoreActive = coreStatus === 'EXIST';
 
     // Adaptive grid color based on mode (warmer, less bright)
     const gridColor = mode === 'LUMA' ? 'rgba(120, 110, 95, 0.25)' : '#5a5654'; // Warm neutral for LUMA
@@ -90,36 +93,27 @@ const GraphCanvas = () => {
                 className="w-full h-full flex items-center justify-center transform-gpu"
                 style={{ x, y, scale }}
             >
-                {/* Connecting Lines (Axes) */}
+                {/* Connecting Lines (Axes) - REMOVED v0.327
                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-                    <g style={{ transform: 'translate(50%, 50%)' }}> {/* Center origin using CSS transform */}
-                        {/* We need to calculate line ends based on current XP positions */}
-                        {/* This is a bit tricky in SVG inside a centered div, but let's try relative coords */}
-                        {/* Actually, since we are centering the content, 0,0 is the center of the animated div */}
-
+                    <g style={{ transform: 'translate(50%, 50%)' }}>
                         <line x1="0" y1="0" x2={getAxisPosition('SP', xpState.sp).x} y2={getAxisPosition('SP', xpState.sp).y} stroke={axisColor} strokeWidth="1" />
                         <line x1="0" y1="0" x2={getAxisPosition('HP', xpState.hp).x} y2={getAxisPosition('HP', xpState.hp).y} stroke={axisColor} strokeWidth="1" />
                         <line x1="0" y1="0" x2={getAxisPosition('EP', xpState.ep).x} y2={getAxisPosition('EP', xpState.ep).y} stroke={axisColor} strokeWidth="1" />
                         <line x1="0" y1="0" x2={getAxisPosition('MP', xpState.mp).x} y2={getAxisPosition('MP', xpState.mp).y} stroke={axisColor} strokeWidth="1" />
                     </g>
                 </svg>
+                */}
 
-                {/* NP Core (Center) */}
+                {/* NP Core (Center) or Source */}
                 <div className="relative z-10">
-                    {isCoreActive ? (
+                    {coreStatus === 'EXIST' ? (
                         <NPCore />
                     ) : (
-                        <button
-                            onClick={createCore}
-                            className="w-24 h-24 rounded-full border-2 border-dashed border-os-glass-border flex flex-col items-center justify-center gap-2 text-os-text-secondary hover:text-os-cyan hover:border-os-cyan hover:bg-os-cyan/5 transition-all group"
-                        >
-                            <span className="text-2xl group-hover:scale-110 transition-transform">+</span>
-                            <span className="text-[10px] uppercase tracking-widest">Add Core</span>
-                        </button>
+                        <Source />
                     )}
                 </div>
 
-                {/* XP Mandala Nodes */}
+                {/* XP Mandala Nodes - HIDDEN FOR v0.326
                 {isCoreActive && (
                     <>
                         <XPMandala type="SP" value={xpState.sp} glyph="🌬️" color="os-sp" glowColor="#ededeb" position={getAxisPosition('SP', xpState.sp)} />
@@ -128,6 +122,7 @@ const GraphCanvas = () => {
                         <XPMandala type="MP" value={xpState.mp} glyph="🔥" color="os-mp" glowColor="#fdba74" position={getAxisPosition('MP', xpState.mp)} />
                     </>
                 )}
+                */}
             </animated.div>
 
             {/* Canvas Status */}

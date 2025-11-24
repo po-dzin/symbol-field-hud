@@ -36,11 +36,14 @@ export const useWindowStore = create((set) => ({
     })),
 
     isCoreMinimized: false,
-    isCoreActive: true, // Core exists by default
+    coreStatus: 'SOURCE', // 'SOURCE' | 'EXIST'
 
     toggleCoreMinimize: () => set((state) => ({ isCoreMinimized: !state.isCoreMinimized })),
-    deleteCore: () => set({ isCoreActive: false }),
-    createCore: () => set({ isCoreActive: true }),
+    setCoreStatus: (status) => set({ coreStatus: status }),
+
+    // Legacy support (mapped to status)
+    deleteCore: () => set({ coreStatus: 'SOURCE' }),
+    createCore: () => set({ coreStatus: 'EXIST' }),
 
     openWindow: (id, config) => set((state) => {
         if (state.windows[id]) {
