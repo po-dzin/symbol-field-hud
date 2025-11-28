@@ -13,66 +13,7 @@ export const useGraphStore = create((set, get) => ({
     // Connection State
     tempConnection: null, // { sourceId, sourcePos, currentPos }
 
-    // Camera State (Persistent)
-    camera: { x: null, y: null, scale: 1 }, // x/y null means not yet initialized
-    cameraMode: 'manual', // 'manual' | 'focus' | 'ritual'
-    cameraCommand: null, // { type: 'PAN'|'FOCUS', target: {x,y,scale}, duration, id }
-
-    // Camera Settings (v0.37)
-    cameraSettings: {
-        infinite: true,
-        minZoom: 0.15,
-        maxZoom: 2.0,
-        autoCenter: false
-    },
-
     // Actions
-    updateCamera: (camera) => {
-        set(state => ({
-            camera: { ...state.camera, ...camera }
-        }));
-    },
-
-    setCameraMode: (mode) => set({ cameraMode: mode }),
-
-    panCameraTo: (x, y, scale = null) => {
-        set(state => ({
-            cameraMode: 'manual',
-            cameraCommand: {
-                type: 'PAN',
-                target: { x, y, scale: scale || state.camera.scale },
-                id: Date.now()
-            }
-        }));
-    },
-
-    focusCameraOn: (nodeId) => {
-        const { nodes, camera } = get();
-        const node = nodes.find(n => n.id === nodeId);
-        if (!node) return;
-
-        // Calculate center position
-        // We want the node to be in the center of the viewport
-        // Viewport Center (screen space) = (WindowWidth/2, WindowHeight/2)
-        // Node Position (world space) = (node.x, node.y)
-        // Camera Position (world space offset) = ScreenCenter - NodePos * Scale
-
-        // We need window dimensions. Since store is pure JS, we might assume standard center 
-        // or rely on the component to calculate the exact target.
-        // Let's pass the NODE as the target and let the component handle the math.
-
-        set({
-            cameraMode: 'focus',
-            cameraCommand: {
-                type: 'FOCUS',
-                targetNodeId: nodeId,
-                id: Date.now()
-            }
-        });
-    },
-
-    stopCamera: () => set({ cameraCommand: null }),
-
     startConnection: (sourceId, sourcePos) => {
         set({
             interactionState: 'CONNECTING',

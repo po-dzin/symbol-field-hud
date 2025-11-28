@@ -161,7 +161,7 @@ const MainLayout = () => {
             <main className="flex-1 relative h-full">
                 {/* Layer 1: The Infinite Canvas (Always Visible) */}
                 <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
-                    <GraphCanvas />
+                    <GraphCanvas isEditMode={activeTab === 'Graph'} />
                 </div>
 
                 {/* Layer 2: Core Overlays */}

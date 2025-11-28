@@ -4,10 +4,10 @@ import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
 
-const Node = ({ node, onClick, onRightClick }) => {
+const Node = ({ node, isEditMode = false, onClick, onRightClick }) => {
     const { entity, components, state } = node;
     const { mode } = useStateStore();
-    const { startConnection, endConnection, transformSourceToCore, focusCameraOn } = useGraphStore();
+    const { startConnection, endConnection, transformSourceToCore } = useGraphStore();
     const { openWindow } = useWindowStore();
 
     // Force re-render every 10 seconds for aging animation
@@ -62,6 +62,7 @@ const Node = ({ node, onClick, onRightClick }) => {
     const accentRGB = hexToRgb(activeColor);
 
     const handleMouseDown = (e) => {
+        if (!isEditMode) return; // Block shift-click connections in HUD mode
         if (e.shiftKey) {
             e.stopPropagation();
             startConnection(node.id, node.position);
@@ -69,22 +70,61 @@ const Node = ({ node, onClick, onRightClick }) => {
     };
 
     const handleMouseUp = (e) => {
+        // Don't end connection if we are the source (allows click-move-click workflow)
+        const { tempConnection } = useGraphStore.getState();
+        if (tempConnection?.sourceId === node.id) return;
+
         endConnection(node.id);
     };
 
     const handleDoubleClick = (e) => {
         e.stopPropagation();
+
+        // 1. SOURCE NODE (SEED) -> Materialize Core & Enter Graph Mode
         if (isSource) {
-            transformSourceToCore(node.id);
+            // FIRST: Switch to Graph Mode (if in HUD)
+            if (!isEditMode) {
+                const { setActiveTab } = useWindowStore.getState();
+                setActiveTab('Graph');
+                console.log('🌱 Switching to Graph Mode (Source -> Core)');
+
+                // THEN: Transform to Core (deferred to allow UI update)
+                setTimeout(() => {
+                    transformSourceToCore(node.id);
+                    console.log('✨ Source materialized into Core');
+                }, 50);
+            } else {
+                // Already in Graph mode, transform immediately
+                transformSourceToCore(node.id);
+                console.log('✨ Source materialized into Core');
+            }
+            return;
         }
-        focusCameraOn(node.id);
+
+        // 2. NORMAL NODE -> Open Fullscreen Content / Document
+        // This works in BOTH HUD and Graph modes
+        const windowId = `node-document-${node.id}`;
+        openWindow(windowId, {
+            title: 'DOCUMENT', // Placeholder for "Node Content/Dock"
+            glyph: glyphChar || 'DOC',
+            data: { id: node.id },
+            initialPosition: { x: window.innerWidth / 2 - 300, y: 100 },
+            width: 600,
+            height: 800
+        });
     };
 
     const handleClick = (e) => {
         e.stopPropagation();
 
-        // Connection Logic (Shift+Click or Ctrl+Click)
-        if (e.shiftKey || e.ctrlKey) {
+        // SOURCE NODE: Ignore single click (waiting for double-click to materialize)
+        if (isSource) {
+            console.log('🌱 Source clicked - use double-click to materialize');
+            return;
+        }
+
+        // Connection Logic (Shift+Click or Ctrl+Click) - only in edit mode
+        if ((e.shiftKey || e.ctrlKey) && isEditMode) {
             const { interactionState, tempConnection } = useGraphStore.getState();
 
             if (interactionState === 'CONNECTING' && tempConnection?.sourceId !== node.id) {
@@ -161,6 +201,10 @@ const Node = ({ node, onClick, onRightClick }) => {
     const isJoyful = timeSinceActivation < 60000; // 1 minute
     const joyIntensity = Math.max(0, 1 - (timeSinceActivation / 60000));
 
+    // Glow intensity: softer in HUD mode, active in Graph mode
+    const glowIntensity = isEditMode ? 1.0 : 0.65;
+    const hudContrast = isEditMode ? 1.0 : 0.9;
+
     // 2.71D Glassy Liquid Pointcloud Crystal Style (MORE BRIGHT)
     const crystalStyle = {
         background: `radial-gradient(circle at 35% 35%, 
@@ -171,7 +215,7 @@ const Node = ({ node, onClick, onRightClick }) => {
         boxShadow: `
             inset -8px -8px 30px rgba(0,0,0,0.6),
             inset 4px 4px 20px rgba(255,255,255,${0.7 * brightnessFactor}),
-            0 0 ${40 * brightnessFactor}px rgba(${accentRGB}, ${0.4 * brightnessFactor})
+            0 0 ${40 * brightnessFactor * glowIntensity}px rgba(${accentRGB}, ${0.4 * brightnessFactor * glowIntensity})
         `,
         backdropFilter: `blur(${8 + blurAmount}px)`,
         filter: `blur(${blurAmount}px) brightness(${brightnessFactor})`,
@@ -179,13 +223,18 @@ const Node = ({ node, onClick, onRightClick }) => {
         transition: 'all 2s ease-out'
     };
 
+
+
+
+
     return (
         <div
             className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group flex items-center justify-center outline-none transition-all duration-300"
             style={{
                 left: node.position.x,
                 top: node.position.y,
-                zIndex: isCore ? 50 : (isWindowOpen ? 60 : 10)
+                zIndex: isCore ? 50 : (isWindowOpen ? 60 : 10),
+                filter: `contrast(${hudContrast})`
             }}
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
