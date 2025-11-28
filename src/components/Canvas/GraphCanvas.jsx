@@ -39,6 +39,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
     const panStart = useRef({ x: 0, y: 0 });
     const cameraStart = useRef({ x: 0, y: 0 });
     const canvasMouseDownRef = useRef(false);
+    const isCreatingNode = useRef(false);
 
     // Mouse event handlers for panning
     const handleMouseDown = (e) => {
@@ -90,24 +91,10 @@ const GraphCanvas = ({ isEditMode = false }) => {
         }
     };
 
-    const createConnectedNode = (e) => {
-        if (!isEditMode) return;
-        const { tempConnection } = useGraphStore.getState();
-        if (!tempConnection) return;
-
-        const coreExists = nodes.some(n => n.entity.type === 'core');
-        if (!coreExists) {
-            console.log('❌ Cannot create nodes - Core must exist first!');
-            return;
-        }
-
-        const rect = containerRef.current.getBoundingClientRect();
-        let finalX = (e.clientX - rect.left - camera.x) / camera.scale;
-        let finalY = (e.clientY - rect.top - camera.y) / camera.scale;
-
-        // REPULSION: Check against ALL nodes
-        let safeX = finalX;
-        let safeY = finalY;
+    // Helper: Calculate safe position with repulsion from ALL nodes
+    const calculateSafePosition = (x, y) => {
+        let safeX = x;
+        let safeY = y;
         const minDistance = 120; // Safe distance (Node width ~64px + gap)
 
         // Simple relaxation loop to resolve collisions
@@ -137,7 +124,51 @@ const GraphCanvas = ({ isEditMode = false }) => {
             if (!adjusted) break;
         }
 
-        addNode({ x: safeX, y: safeY }, tempConnection.sourceId);
+        return { x: safeX, y: safeY };
+    };
+
+    const createConnectedNode = (e) => {
+        // Prevent duplicate creation
+        if (isCreatingNode.current) {
+            console.log('⚠️ Node creation already in progress, skipping...');
+            return;
+        }
+
+        if (!isEditMode) return;
+        const { tempConnection } = useGraphStore.getState();
+        if (!tempConnection) return;
+
+        isCreatingNode.current = true;
+
+        const coreExists = nodes.some(n => n.entity.type === 'core');
+        if (!coreExists) {
+            console.log('❌ Cannot create nodes - Core must exist first!');
+            isCreatingNode.current = false;
+            return;
+        }
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const initialX = (e.clientX - rect.left - camera.x) / camera.scale;
+        const initialY = (e.clientY - rect.top - camera.y) / camera.scale;
+
+        // VALIDATE coordinates
+        if (!isFinite(initialX) || !isFinite(initialY)) {
+            console.error('❌ Invalid coordinates for Quick Connect:', { initialX, initialY, event: e });
+            isCreatingNode.current = false;
+            return;
+        }
+
+        console.log('⚡ Quick Connect: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
+
+        // Apply universal repulsion
+        const safePos = calculateSafePosition(initialX, initialY);
+
+        addNode(safePos, tempConnection.sourceId);
+
+        // Release lock after a short delay
+        setTimeout(() => {
+            isCreatingNode.current = false;
+        }, 100);
     };
 
     // Zoom handler
@@ -218,8 +249,23 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
     // Double Click to Create Node
     const handleDoubleClick = (e) => {
-        if (!isEditMode) return; // Block node creation in HUD mode
-        if (e.shiftKey) return;
+        console.log('🖱️ Double-click detected', { x: e.clientX, y: e.clientY, shift: e.shiftKey, editMode: isEditMode });
+
+        // Prevent duplicate creation
+        if (isCreatingNode.current) {
+            console.log('⚠️ Node creation already in progress, skipping...');
+            return;
+        }
+
+        if (!isEditMode) {
+            console.log('⚠️ Double-click ignored: HUD mode (view-only)');
+            return;
+        }
+
+        if (e.shiftKey) {
+            console.log('⚠️ Double-click ignored: Shift key held');
+            return;
+        }
 
         // CANNOT create nodes without Core!
         const coreExists = nodes.some(n => n.entity.type === 'core');
@@ -228,28 +274,25 @@ const GraphCanvas = ({ isEditMode = false }) => {
             return;
         }
 
+        isCreatingNode.current = true;
+
         const rect = containerRef.current.getBoundingClientRect();
-        let finalX = (e.clientX - rect.left - camera.x) / camera.scale;
-        let finalY = (e.clientY - rect.top - camera.y) / camera.scale;
+        const initialX = (e.clientX - rect.left - camera.x) / camera.scale;
+        const initialY = (e.clientY - rect.top - camera.y) / camera.scale;
 
-        // REPULSION: If too close to Core, push node away
-        const coreNode = nodes.find(n => n.entity.type === 'core');
-        if (coreNode) {
-            const dx = finalX - coreNode.position.x;
-            const dy = finalY - coreNode.position.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            const minDistance = 80;
-
-            if (distance < minDistance) {
-                const angle = Math.atan2(dy, dx);
-                finalX = coreNode.position.x + Math.cos(angle) * minDistance;
-                finalY = coreNode.position.y + Math.sin(angle) * minDistance;
-                console.log('⚡ Node pushed away from Core (repulsion)');
-            }
+        // VALIDATE coordinates
+        if (!isFinite(initialX) || !isFinite(initialY)) {
+            console.error('❌ Invalid coordinates for double-click:', { initialX, initialY, event: e });
+            isCreatingNode.current = false;
+            return;
         }
 
-        const newNodeId = addNode({ x: finalX, y: finalY });
+        console.log('✨ Double-click: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
+
+        // Apply universal repulsion
+        const safePos = calculateSafePosition(initialX, initialY);
+
+        const newNodeId = addNode(safePos);
 
         // Auto-open properties window for newly created node
         if (newNodeId) {
@@ -274,6 +317,11 @@ const GraphCanvas = ({ isEditMode = false }) => {
         }
 
         // Camera NEVER moves on node creation!
+
+        // Release lock after a short delay
+        setTimeout(() => {
+            isCreatingNode.current = false;
+        }, 100);
     };
 
     // Click Canvas to Create Connected Node (Shift+Click while connecting)

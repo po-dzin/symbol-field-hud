@@ -92,11 +92,31 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick }) => {
                 setTimeout(() => {
                     transformSourceToCore(node.id);
                     console.log('✨ Source materialized into Core');
+
+                    // Auto-open properties for the new Core node
+                    setTimeout(() => {
+                        const { openWindow } = useWindowStore.getState();
+                        openWindow(`node-properties-${node.id}`, {
+                            title: 'PROPERTIES',
+                            glyph: 'CORE',
+                            data: { id: node.id }
+                        });
+                    }, 100);
                 }, 50);
             } else {
                 // Already in Graph mode, transform immediately
                 transformSourceToCore(node.id);
                 console.log('✨ Source materialized into Core');
+
+                // Auto-open properties
+                setTimeout(() => {
+                    const { openWindow } = useWindowStore.getState();
+                    openWindow(`node-properties-${node.id}`, {
+                        title: 'PROPERTIES',
+                        glyph: 'CORE',
+                        data: { id: node.id }
+                    });
+                }, 100);
             }
             return;
         }
