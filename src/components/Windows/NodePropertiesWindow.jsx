@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useGraphStore } from '../../store/graphStore';
 import { TONES } from '../../store/stateStore';
 
-const NodePropertiesWindow = ({ node, onClose }) => {
+const NodePropertiesWindow = ({ node: initialNode, onClose }) => {
+    const currentNode = useGraphStore(state => state.nodes.find(n => n.id === initialNode.id));
+    const node = currentNode || initialNode;
+
     const { updateNodeComponent, addComponentToNode, removeComponentFromNode } = useGraphStore();
     const [showAddComponent, setShowAddComponent] = useState(false);
 
@@ -29,9 +32,7 @@ const NodePropertiesWindow = ({ node, onClose }) => {
     };
 
     const handleRemoveComponent = (componentType) => {
-        if (window.confirm(`Remove ${componentType} component?`)) {
-            removeComponentFromNode(node.id, componentType);
-        }
+        removeComponentFromNode(node.id, componentType);
     };
 
     const handleUpdateXP = (field, value) => {

@@ -360,6 +360,29 @@ body {
   animation: wave-pulse 3s ease-out infinite;
 }
 
+/* Onboarding Tooltip Animation */
+@keyframes fade-scale {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.95);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.95);
+  }
+}
+
+.animate-fade-scale {
+  animation: fade-scale 2s ease-in-out forwards;
+}
+
 @keyframes crystallize {
   0% {
     opacity: 0;

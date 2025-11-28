@@ -55,6 +55,16 @@ export const useWindowStore = create((set) => ({
     deleteCore: () => set({ coreStatus: 'SOURCE' }),
     createCore: () => set({ coreStatus: 'EXIST' }),
 
+    // Onboarding tooltip
+    onboardingTooltip: null, // { message: string, startTime: number }
+    showOnboardingTooltip: (message, duration = 2000) => {
+        set({ onboardingTooltip: { message, startTime: Date.now() } });
+        setTimeout(() => {
+            set({ onboardingTooltip: null });
+        }, duration);
+    },
+    hideOnboardingTooltip: () => set({ onboardingTooltip: null }),
+
     openWindow: (id, config) => set((state) => {
         if (state.windows[id]) {
             // If already open, just focus it

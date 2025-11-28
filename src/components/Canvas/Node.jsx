@@ -4,7 +4,7 @@ import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
 
-const Node = ({ node, isEditMode = false, onClick, onRightClick }) => {
+const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboarding }) => {
     const { entity, components, state } = node;
     const { mode } = useStateStore();
     const { startConnection, endConnection, transformSourceToCore } = useGraphStore();
@@ -82,31 +82,23 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick }) => {
 
         // 1. SOURCE NODE (SEED) -> Materialize Core & Enter Graph Mode
         if (isSource) {
-            // FIRST: Switch to Graph Mode (if in HUD)
-            if (!isEditMode) {
+            // HUD Mode: Use onboarding flow (camera animation + tooltip)
+            if (!isEditMode && onSourceOnboarding) {
                 const { setActiveTab } = useWindowStore.getState();
                 setActiveTab('Graph');
-                console.log('🌱 Switching to Graph Mode (Source -> Core)');
+                console.log('🌱 Switching to Graph Mode (Onboarding)');
 
-                // THEN: Transform to Core (deferred to allow UI update)
+                // Trigger onboarding flow (camera + materialization + tooltip)
                 setTimeout(() => {
-                    transformSourceToCore(node.id);
-                    console.log('✨ Source materialized into Core');
-
-                    // Auto-open properties for the new Core node
-                    setTimeout(() => {
-                        const { openWindow } = useWindowStore.getState();
-                        openWindow(`node-properties-${node.id}`, {
-                            title: 'PROPERTIES',
-                            glyph: 'CORE',
-                            data: { id: node.id }
-                        });
-                    }, 100);
+                    onSourceOnboarding(node.id, node.position);
                 }, 50);
-            } else {
-                // Already in Graph mode, transform immediately
+                return;
+            }
+
+            // Graph Mode: Direct materialization (no camera animation)
+            if (isEditMode) {
                 transformSourceToCore(node.id);
-                console.log('✨ Source materialized into Core');
+                console.log('✨ Source materialized into Core (direct)');
 
                 // Auto-open properties
                 setTimeout(() => {

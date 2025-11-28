@@ -5,6 +5,9 @@ import { useGraphStore } from '../../store/graphStore';
 import { useStateStore } from '../../store/stateStore';
 import { useWindowStore } from '../../store/windowStore';
 
+// Easing function for smooth camera animation
+const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
 const GraphCanvas = ({ isEditMode = false }) => {
     const containerRef = useRef(null);
     const {
@@ -19,9 +22,13 @@ const GraphCanvas = ({ isEditMode = false }) => {
         cancelConnection
     } = useGraphStore();
     const { mode } = useStateStore();
+    const { onboardingTooltip, showOnboardingTooltip } = useWindowStore();
 
     // Radial Menu State
     const [radialMenu, setRadialMenu] = useState(null);
+
+    // Camera animation state
+    const isAnimatingCamera = useRef(false);
 
     // ============================================================================
     // PURE CSS/JS CAMERA SYSTEM (No react-spring, no useGesture)
@@ -184,6 +191,25 @@ const GraphCanvas = ({ isEditMode = false }) => {
         }));
     };
 
+    // Global Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Undo: Ctrl+Z or Cmd+Z
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                useGraphStore.getState().undo();
+            }
+            // Redo: Ctrl+Shift+Z or Cmd+Shift+Z
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
+                e.preventDefault();
+                useGraphStore.getState().redo();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     // Attach global mouse listeners
     useEffect(() => {
         window.addEventListener('mousemove', handleMouseMove);
@@ -193,6 +219,70 @@ const GraphCanvas = ({ isEditMode = false }) => {
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, [camera, interactionState, isEditMode, nodes]); // Re-attach when state changes
+
+    // Camera Animation Function
+    const animateCameraTo = (targetX, targetY, duration = 500) => {
+        if (isAnimatingCamera.current) return;
+        isAnimatingCamera.current = true;
+
+        const startX = camera.x;
+        const startY = camera.y;
+        const startTime = Date.now();
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeInOutCubic(progress);
+
+            const newX = startX + (targetX - startX) * eased;
+            const newY = startY + (targetY - startY) * eased;
+
+            setCamera(prev => ({
+                ...prev,
+                x: newX,
+                y: newY
+            }));
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                isAnimatingCamera.current = false;
+            }
+        };
+
+        requestAnimationFrame(animate);
+    };
+
+    // Source Onboarding Handler  
+    const handleSourceOnboarding = (nodeId, position) => {
+        console.log('🎬 Starting Source onboarding flow', { nodeId, position });
+
+        // 1. Animate camera to Source position (500ms)
+        animateCameraTo(
+            window.innerWidth / 2 - position.x,
+            window.innerHeight / 2 - position.y,
+            500
+        );
+
+        // 2. After animation: materialize Core and show tooltip
+        setTimeout(() => {
+            transformSourceToCore(nodeId);
+            console.log('✨ Source materialized into Core (via onboarding)');
+
+            // 3. Show onboarding tooltip
+            showOnboardingTooltip('Graph unlocked...', 2000);
+
+            // 4. Auto-open properties for the new Core node
+            setTimeout(() => {
+                const { openWindow } = useWindowStore.getState();
+                openWindow(`node-properties-${nodeId}`, {
+                    title: 'PROPERTIES',
+                    glyph: 'CORE',
+                    data: { id: nodeId }
+                });
+            }, 100);
+        }, 500);
+    };
 
     // ============================================================================
     // END CAMERA SYSTEM
@@ -659,6 +749,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                         node={node}
                         isEditMode={isEditMode}
                         onClick={handleNodeClick}
+                        onSourceOnboarding={handleSourceOnboarding}
                         onRightClick={(nodeId, position) => {
                             if (!isEditMode) return; // Block radial menu in HUD mode
                             setRadialMenu({ nodeId, position });
@@ -698,6 +789,20 @@ const GraphCanvas = ({ isEditMode = false }) => {
                 <br />
                 {interactionState === 'CONNECTING' && <span className="text-os-cyan animate-pulse">CONNECTING...</span>}
             </div>
+
+            {/* Onboarding Tooltip */}
+            {onboardingTooltip && (
+                <div
+                    className="absolute top-[60%] left-1/2 -translate-x-1/2
+                               px-6 py-3 bg-black/90 border border-cyan-500/60
+                               text-cyan-300 text-sm tracking-widest font-mono
+                               rounded-md shadow-lg shadow-cyan-500/20
+                               animate-fade-scale pointer-events-none"
+                    style={{ zIndex: 10000 }}
+                >
+                    {onboardingTooltip.message}
+                </div>
+            )}
 
             {/* Radial Menu */}
             {radialMenu && (

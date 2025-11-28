@@ -60,23 +60,26 @@ const WindowFrame = ({
 
     React.useEffect(() => {
         const handleMouseMove = (e) => {
-            if (!isDragging) return;
+            if (!isDragging || !nodeRef.current) return;
 
             const newX = e.clientX - dragOffset.x;
             const newY = e.clientY - dragOffset.y;
-
-            // Safe Zones Logic (Simplified clamping)
-            // We can add the complex safe zone logic here if needed
-
             const newPos = { x: newX, y: newY };
-            setCurrentPosition(newPos);
+
+            // Direct DOM update for performance (bypassing React render cycle)
+            nodeRef.current.style.left = `${newX}px`;
+            nodeRef.current.style.top = `${newY}px`;
+
             positionRef.current = newPos; // Keep ref updated
         };
 
         const handleMouseUp = () => {
             if (isDragging) {
                 setIsDragging(false);
-                updateWindowPosition(id, positionRef.current); // Use ref value
+                // Sync with store (this will trigger re-render)
+                updateWindowPosition(id, positionRef.current);
+                // Sync local state to ensure consistency after store update
+                setCurrentPosition(positionRef.current);
             }
         };
 
@@ -95,7 +98,8 @@ const WindowFrame = ({
         <div
             ref={nodeRef}
             className={clsx(
-                "window-frame pointer-events-auto absolute flex flex-col bg-os-glass-bg/90 backdrop-blur-2xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out",
+                "window-frame pointer-events-auto absolute flex flex-col bg-os-glass-bg/90 backdrop-blur-2xl rounded-lg overflow-hidden",
+                !isDragging && "transition-all duration-200 ease-in-out",
                 isMinimized ? "w-0 h-0 opacity-0 pointer-events-none" : "w-[500px] h-[400px]"
             )}
             style={{
