@@ -20,10 +20,10 @@ const XpSummaryPanel = () => {
 
     return (
         <Draggable nodeRef={nodeRef} handle=".xp-handle">
-            <div ref={nodeRef} className="absolute top-6 right-6 flex flex-col items-end gap-2 pointer-events-auto z-30">
+            <div ref={nodeRef} className="absolute top-32 left-6 flex flex-col items-start gap-2 pointer-events-auto">
                 {/* Panel Container */}
                 <div
-                    className="backdrop-blur-xl p-5 w-48 transition-all duration-300 xp-handle cursor-grab active:cursor-grabbing"
+                    className="backdrop-blur-xl px-5 py-3 w-auto h-[72px] flex flex-wrap gap-4 justify-center items-center xp-handle cursor-grab active:cursor-grabbing"
                     style={{
                         background: 'var(--surface-1-bg)',
                         border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
@@ -33,20 +33,29 @@ const XpSummaryPanel = () => {
                         '--glow-color': `${activeColor}60`
                     }}
                 >
-                    <div className="text-[10px] font-bold mb-4 tracking-[0.08em] uppercase border-b border-white/10 pb-2 flex justify-between items-center"
-                        style={{ color: `rgba(${accentRGB}, 0.85)` }}
-                        title="Experience Summary"
-                    >
-                        <span>XP Summary</span>
-                        <span className="text-xs opacity-50">∑</span>
-                    </div>
-
-                    <div className="space-y-3">
-                        <XpRow label="HP" value={hp} icon="🪨" color={mode === 'LUMA' ? '#a85645' : '#cd8475'} />
-                        <XpRow label="EP" value={ep} icon="💧" color={mode === 'LUMA' ? '#9c7b4f' : '#cdab75'} />
-                        <XpRow label="MP" value={mp} icon="🔥" color={mode === 'LUMA' ? '#4f9c4f' : '#75cd75'} />
-                        <XpRow label="SP" value={sp} icon="🌬️" color={mode === 'LUMA' ? '#328a8a' : '#75cdcd'} />
-                        <XpRow label="NP" value={np} icon="🌈" color={mode === 'LUMA' ? '#6a4f9c' : '#8e75cd'} />
+                    {/* Circular XP Items */}
+                    <div className="flex gap-3 flex-wrap justify-center">
+                        {[
+                            { label: 'HP', fullName: 'Health Points', value: hp, emoji: '🪨', color: mode === 'LUMA' ? '#a85645' : '#cd8475' },
+                            { label: 'EP', fullName: 'Energy Points', value: ep, emoji: '💧', color: mode === 'LUMA' ? '#9c7b4f' : '#cdab75' },
+                            { label: 'MP', fullName: 'Mind Points', value: mp, emoji: '🔥', color: mode === 'LUMA' ? '#4f9c4f' : '#75cd75' },
+                            { label: 'SP', fullName: 'Spirit Points', value: sp, emoji: '🌬️', color: mode === 'LUMA' ? '#328a8a' : '#75cdcd' },
+                            { label: 'NP', fullName: 'Nothing Points', value: np, emoji: '🌈', color: mode === 'LUMA' ? '#6a4f9c' : '#8e75cd' }
+                        ].map(item => (
+                            <div key={item.label} className="flex flex-col items-center gap-0.5" title={`${item.label} // ${item.fullName}`}>
+                                <div
+                                    className="flex items-center justify-center w-9 h-9 rounded-full text-base"
+                                    style={{
+                                        background: `rgba(${accentRGB}, 0.1)`,
+                                        border: `2px solid ${item.color}`,
+                                        color: item.color
+                                    }}
+                                >
+                                    {item.emoji}
+                                </div>
+                                <span className="text-xs font-mono" style={{ color: item.color }}>{item.value}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

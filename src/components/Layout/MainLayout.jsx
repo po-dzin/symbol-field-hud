@@ -2,15 +2,17 @@ import React, { useEffect } from 'react';
 import NavRail from '../HUD/NavRail';
 // import Dock from '../HUD/Dock'; // Replaced by TimeSpiral
 import GraphCanvas from '../Canvas/GraphCanvas';
+import { useWindowStore } from '../../store/windowStore';
+import { useStateStore } from '../../store/stateStore';
+import { useGraphStore } from '../../store/graphStore';
 import WindowFrame from '../HUD/WindowFrame';
+import NodePropertiesWindow from '../Windows/NodePropertiesWindow';
 import AgentWindow from '../Modules/AgentWindow';
 
 import StatePanel from '../HUD/StatePanel'; // Import StatePanel
 import TimeSpiral from '../HUD/TimeSpiral'; // Import TimeSpiral
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
-import { useWindowStore } from '../../store/windowStore';
-import { useStateStore } from '../../store/stateStore';
 
 const MainLayout = () => {
     const { windows, activeTab, resetWindows } = useWindowStore();
@@ -70,7 +72,7 @@ const MainLayout = () => {
                                 isStatic
                                 style={{ zIndex: windows['log-main']?.zIndex }}
                             >
-                                <div className="text-os-text-secondary p-4 font-mono text-sm">
+                                <div className="text-os-text-secondary p-4 font-mono text-sm selectable-text">
                                     <div className="text-os-cyan mb-2">SYSTEM ONLINE // V.0.3.0</div>
                                     <div className="opacity-70">Initializing Core... OK</div>
                                     <div className="opacity-70">Loading Modules... OK</div>
@@ -150,26 +152,71 @@ const MainLayout = () => {
         <div className={`relative w-screen h-screen overflow-hidden flex transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
             style={{ filter: isGrayscale ? 'grayscale(100%)' : 'none' }}
         >
-            {/* Nav Rail - Left (Now Dock) */}
-            <NavRail />
+            {/* Nav Rail - Left (Now Dock) - L5 Trinity */}
+            <div className="relative z-[var(--z-trinity)]">
+                <NavRail />
+            </div>
 
             {/* Main Content Area */}
             <main className="flex-1 relative h-full">
                 {/* Layer 1: The Infinite Canvas (Always Visible) */}
-                <div className={`absolute inset-0 z-0 ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
+                <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
                     <GraphCanvas />
                 </div>
 
-                {/* Layer 2: Tab Content Overlay */}
-                <div className="absolute inset-0 pointer-events-none">
+                {/* Layer 2: Core Overlays */}
+                <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
+                    <CoreWidget />
+                </div>
+
+                {/* Layer 3: Floating Windows (Tab Content) */}
+                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
                     {renderTabContent()}
                 </div>
 
-                {/* Layer 3: HUD Specific Panels */}
-                <StatePanel />
-                {activeTab === 'HUD' && <XpSummaryPanel />}
-                <TimeSpiral />
-                <CoreWidget />
+                {/* Layer 4: Floating Windows (Node Properties, etc.) */}
+                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+                    {Object.values(useWindowStore.getState().windows)
+                        .filter(w => w.isOpen && !w.isMinimized)
+                        .map(win => {
+                            if (win.id.startsWith('node-properties-')) {
+                                const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
+                                if (!node) return null;
+
+                                return (
+                                    <div key={win.id} className="pointer-events-none absolute inset-0">
+                                        <WindowFrame
+                                            id={win.id}
+                                            title={win.title}
+                                            glyph={win.glyph}
+                                            initialPosition={win.position}
+                                            style={{ zIndex: win.zIndex }}
+                                        >
+                                            <NodePropertiesWindow
+                                                node={node}
+                                                onClose={() => useWindowStore.getState().closeWindow(win.id)}
+                                            />
+                                        </WindowFrame>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })
+                    }
+                </div>
+
+                {/* Layer 5: XP Summary */}
+                {activeTab === 'HUD' && (
+                    <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
+                        <XpSummaryPanel />
+                    </div>
+                )}
+
+                {/* Layer 5: Trinity (State & Time) */}
+                <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
+                    <StatePanel />
+                    <TimeSpiral />
+                </div>
             </main>
         </div>
     );

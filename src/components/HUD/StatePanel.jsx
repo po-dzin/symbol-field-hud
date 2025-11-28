@@ -28,7 +28,7 @@ const ModePill = ({ modeKey, active, onClick, accentColor, mode }) => {
             onMouseLeave={() => setHover(false)}
             title={`${modeData.label} Mode`}
             className={`
-                inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full transition-all duration-300
+                inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full transition-all duration-300 cursor-pointer
                 ${active ? '' : (mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5')}
             `}
             style={active ? {
@@ -76,7 +76,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Tone: ${currentTone.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
             >
                 <div
                     className="w-5 h-5 rounded-full shadow-sm border border-white/10"
@@ -95,7 +95,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
                                 key={tone.id}
                                 onClick={() => { onSelect(tone.id); setIsOpen(false); }}
                                 title={tone.label}
-                                className="w-8 h-8 rounded-full hover:scale-110 transition-transform flex items-center justify-center"
+                                className="w-8 h-8 rounded-full hover:scale-110 transition-transform flex items-center justify-center cursor-pointer"
                             >
                                 <div
                                     className="w-6 h-6 rounded-full shadow-sm border border-white/10"
@@ -172,7 +172,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
                             key={glyph.id}
                             onClick={() => { onSelect(glyph.id); setIsOpen(false); }}
                             title={glyph.label}
-                            className={`w-8 h-8 rounded-full transition-colors flex items-center justify-center
+                            className={`w-8 h-8 rounded-full transition-colors flex items-center justify-center cursor-pointer
                                 ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/10'}
                                 ${glyph.id === currentGlyphId
                                     ? (isLuma ? 'text-[#2A2620] font-bold' : 'text-white font-bold')
@@ -205,12 +205,12 @@ const StatePanel = () => {
 
     const accentRGB = hexToRgb(activeColor);
 
-    if (activeTab !== 'HUD') return null;
+    // StatePanel always visible (removed activeTab guard)
 
     return (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
             <div
-                className="flex items-center gap-4 px-5 h-[72px] backdrop-blur-xl transition-all duration-300"
+                className="flex items-center gap-4 px-5 h-[72px] backdrop-blur-xl transition-all duration-300 cursor-default"
                 style={{
                     background: 'var(--surface-1-bg)',
                     border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,

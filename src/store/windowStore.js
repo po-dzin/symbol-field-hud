@@ -71,7 +71,23 @@ export const useWindowStore = create((set) => ({
         // Calculate cascade position
         const openCount = Object.values(state.windows).filter(w => w.isOpen).length;
         const cascadeOffset = openCount * 30;
-        const defaultPos = { x: 100 + cascadeOffset, y: 100 + cascadeOffset };
+
+        let defaultPos = { x: 100 + cascadeOffset, y: 100 + cascadeOffset };
+
+        // Specific positioning for Node Properties
+        if (id.startsWith('node-properties-')) {
+            // Check if any other node-properties window exists to preserve position
+            const existingPropertiesWindow = Object.values(state.windows)
+                .find(w => w.id.startsWith('node-properties-'));
+
+            if (existingPropertiesWindow && existingPropertiesWindow.position) {
+                // Use position of existing/previous properties window
+                defaultPos = existingPropertiesWindow.position;
+            } else {
+                // Default to right side only if no previous window exists
+                defaultPos = { x: window.innerWidth - 550, y: 100 };
+            }
+        }
 
         // Open new
         return {

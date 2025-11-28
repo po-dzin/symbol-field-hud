@@ -42,13 +42,13 @@ const TimeSpiral = () => {
         return () => cancelAnimationFrame(id);
     }, [mode]);
 
-    if (activeTab !== 'HUD') return null;
+    // TimeSpiral always visible (removed activeTab guard)
 
     return (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
             <div
                 className={`
-                    relative backdrop-blur-xl transition-all duration-500 ease-out flex flex-col items-center
+                    relative backdrop-blur-xl transition-all duration-500 ease-out flex flex-col items-center cursor-default
                     ${expanded ? 'w-[400px] h-[140px] p-4' : 'w-[280px] h-[72px] px-6 flex-row justify-between'}
                 `}
                 style={{
@@ -89,7 +89,7 @@ const TimeSpiral = () => {
 
                         <button
                             onClick={() => setExpanded(true)}
-                            className="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary transition-colors"
+                            className="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary transition-colors cursor-pointer"
                         >
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M18 15l-6-6-6 6" />
@@ -106,7 +106,7 @@ const TimeSpiral = () => {
                             <span className="text-[10px] font-bold tracking-widest text-os-text-secondary">TIME SCALE</span>
                             <button
                                 onClick={() => setExpanded(false)}
-                                className="w-6 h-6 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary"
+                                className="w-6 h-6 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary cursor-pointer"
                             >
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M6 9l6 6 6-6" />
@@ -123,7 +123,7 @@ const TimeSpiral = () => {
                                         key={scale.id}
                                         onClick={() => setTimeScale(scale.id)}
                                         className={`
-                                            flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300
+                                            flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer
                                             ${isActive ? 'bg-white/10 text-white' : 'text-os-text-secondary hover:text-os-text-primary hover:bg-white/5'}
                                         `}
                                         style={isActive ? {

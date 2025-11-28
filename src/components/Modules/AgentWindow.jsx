@@ -28,7 +28,7 @@ const AgentWindow = () => {
     return (
         <div className="flex flex-col h-full text-sm font-mono">
             {/* Chat History */}
-            <div className="flex-1 space-y-3 mb-4">
+            <div className="flex-1 space-y-3 mb-4 selectable-text">
                 {messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`

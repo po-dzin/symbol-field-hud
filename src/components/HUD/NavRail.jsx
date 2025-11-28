@@ -3,11 +3,11 @@ import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, TONES } from '../../store/stateStore';
 
 const NAV_ITEMS = [
-    { id: 'HUD', label: 'HUD', icon: <span className="block transform scale-110">⍜</span> },
-    { id: 'Graph', label: 'Graph', icon: '◎' },
-    { id: 'Agent', label: 'Agent', icon: <span className="block text-xl -mt-1 transform scale-90 font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span> },
-    { id: 'Log', label: 'Log', icon: <span className="block transform scale-115">≡</span> },
-    { id: 'Settings', label: 'Settings', icon: <span className="block text-3xl -mt-3 font-bold leading-none">∴</span> }
+    { id: 'HUD', label: 'HUD', icon: <span className="block -mt-1">⍜</span> },
+    { id: 'Graph', label: 'Graph', icon: <span className="block">◎</span> },
+    { id: 'Agent', label: 'Agent', icon: <span className="block text-xl font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span> },
+    { id: 'Log', label: 'Log', icon: <span className="block">≡</span> },
+    { id: 'Settings', label: 'Settings', icon: <span className="block text-2xl font-bold leading-none -mt-1">∴</span> }
 ];
 
 const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, className = '' }) => {
@@ -17,7 +17,10 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, classN
         <button
             onClick={() => setActiveTab(id)}
             title={label}
-            className={`relative w-10 h-10 flex items-center justify-center transition-all duration-300 group rounded-xl ${className}`}
+            className={`relative w-10 h-10 flex items-center justify-center transition-all duration-300 group rounded-xl cursor-pointer hover:bg-white/5 ${className}`}
+            style={{
+                backgroundColor: isActive ? `${activeColor}15` : undefined
+            }}
         >
             {/* Icon */}
             <div

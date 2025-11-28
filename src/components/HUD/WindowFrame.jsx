@@ -15,7 +15,7 @@ const WindowFrame = ({
     isStatic,
     style
 }) => {
-    const { focusWindow, minimizeWindow, closeWindow, setWindowPosition, toggleWindowPin, windows } = useWindowStore();
+    const { focusWindow, minimizeWindow, closeWindow, updateWindowPosition, toggleWindowPin, windows } = useWindowStore();
     const { toneId } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const nodeRef = useRef(null);
@@ -26,25 +26,82 @@ const WindowFrame = ({
     // Use provided position, or initial, or default
     const activePosition = position || initialPosition || { x: 0, y: 0 };
 
-    const handleStart = (e, data) => {
+    // Custom Drag Logic
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
+    const [currentPosition, setCurrentPosition] = React.useState(activePosition);
+    const positionRef = React.useRef(activePosition);
+
+    // Sync with store updates if they happen externally (e.g. initial open)
+    React.useEffect(() => {
+        if (!isDragging) {
+            setCurrentPosition(activePosition);
+            positionRef.current = activePosition;
+        }
+    }, [activePosition.x, activePosition.y, isDragging]);
+
+    const handleMouseDown = (e) => {
+        if (isPinned || isStatic) return;
+        // Only allow drag from handle
+        if (!e.target.closest('.window-handle')) return;
+
+        e.preventDefault(); // Prevent text selection
+        setIsDragging(true);
+
+        // Calculate offset from mouse to window top-left
+        const rect = nodeRef.current.getBoundingClientRect();
+        setDragOffset({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        });
+
         focusWindow(id);
     };
 
-    const handleStop = (e, data) => {
-        setWindowPosition(id, { x: data.x, y: data.y });
-    };
+    React.useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+
+            const newX = e.clientX - dragOffset.x;
+            const newY = e.clientY - dragOffset.y;
+
+            // Safe Zones Logic (Simplified clamping)
+            // We can add the complex safe zone logic here if needed
+
+            const newPos = { x: newX, y: newY };
+            setCurrentPosition(newPos);
+            positionRef.current = newPos; // Keep ref updated
+        };
+
+        const handleMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+                updateWindowPosition(id, positionRef.current); // Use ref value
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, dragOffset.x, dragOffset.y, id, updateWindowPosition]);
 
     const content = (
         <div
             ref={nodeRef}
             className={clsx(
-                "window-frame absolute flex flex-col bg-os-glass-bg/90 backdrop-blur-2xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out",
+                "window-frame pointer-events-auto absolute flex flex-col bg-os-glass-bg/90 backdrop-blur-2xl rounded-lg overflow-hidden transition-all duration-200 ease-in-out",
                 isMinimized ? "w-0 h-0 opacity-0 pointer-events-none" : "w-[500px] h-[400px]"
             )}
             style={{
                 zIndex: 100, // Default base
-                left: activePosition.x + 24,
-                top: activePosition.y + 24,
+                left: currentPosition.x,
+                top: currentPosition.y,
                 '--glow-color': `${currentTone.color}60`,
                 borderColor: `${currentTone.color}60`,
                 backgroundColor: `${currentTone.color}02`,
@@ -54,6 +111,7 @@ const WindowFrame = ({
                 boxShadow: `0 0 20px ${currentTone.color}40, 0 4px 12px rgba(0,0,0,0.3)`,
                 ...style
             }}
+            onMouseDown={handleMouseDown}
             onClick={() => focusWindow(id)}
         >
             {/* Header / Handle */}
@@ -100,24 +158,7 @@ const WindowFrame = ({
         </div>
     );
 
-    if (isStatic) {
-        return content;
-    }
-
-    return (
-        <Draggable
-            handle=".window-handle"
-            nodeRef={nodeRef}
-            defaultPosition={initialPosition}
-            position={position || initialPosition}
-            onStart={handleStart}
-            onStop={handleStop}
-            onMouseDown={() => focusWindow(id)}
-            disabled={isPinned}
-        >
-            {content}
-        </Draggable>
-    );
+    return content;
 };
 
 export default WindowFrame;
