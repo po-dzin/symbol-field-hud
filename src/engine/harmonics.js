@@ -68,3 +68,47 @@ export const calculateColorHarmonics = (mode, toneId, xpTotal = 0) => {
         glow: { luma: L_glow, sat: S_glow }
     };
 };
+
+// --- Geometry Engine ---
+
+/**
+ * Calculate geometric properties (radius, pulsation) based on XP, mode, and time
+ * @param {number} xpValue - XP value for this node
+ * @param {string} mode - 'DEEP' | 'FLOW' | 'LUMA'
+ * @param {number} time - Current time in milliseconds
+ * @returns {object} Geometry harmonics { baseRadius, currentRadius, pulseFrequency, pulseAmplitude }
+ */
+export const calculateGeometry = (xpValue, mode, time) => {
+    // 3.1 Orbit Radius
+    // r_i = r_0 + alpha * sqrt(x_i)
+    const r_0 = 64; // Base radius in pixels
+    const alpha = 4; // Growth coefficient
+    const r_i = r_0 + alpha * Math.sqrt(xpValue);
+
+    // 3.3 Pulsation
+    // radius_i(t) = r_i * [1 + amp_i * sin(2*PI*f*t + phi_i)]
+
+    // Frequency based on mode (breathing rate)
+    // Deep: Slow (0.1Hz = 10s cycle), Flow: Medium (0.2Hz = 5s), Luma: Fast (0.3Hz = 3.33s)
+    const f_0 = mode === 'DEEP' ? 0.1 : mode === 'FLOW' ? 0.2 : 0.3;
+
+    // Amplitude based on XP
+    // amp_i = a_0 + mu * x_i
+    const a_0 = 0.05; // 5% base pulse
+    const mu = 0.001; // Growth coefficient
+    const amp_i = a_0 + mu * xpValue;
+
+    // Phase (can be random or based on ID, using 0 for now)
+    const phi_i = 0;
+
+    // Calculate current radius with pulsation
+    const pulsationFactor = 1 + amp_i * Math.sin(2 * Math.PI * f_0 * (time / 1000) + phi_i);
+    const currentRadius = r_i * pulsationFactor;
+
+    return {
+        baseRadius: r_i,
+        currentRadius: currentRadius,
+        pulseFrequency: f_0,
+        pulseAmplitude: amp_i
+    };
+};
