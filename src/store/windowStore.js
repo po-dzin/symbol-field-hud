@@ -82,7 +82,13 @@ export const useWindowStore = create((set) => ({
                 activeWindowId: id,
                 windows: {
                     ...state.windows,
-                    [id]: { ...state.windows[id], isOpen: true, isMinimized: false, zIndex: state.nextZIndex }
+                    [id]: {
+                        ...state.windows[id],
+                        ...config, // Merge new config (title, data, glyph)
+                        isOpen: true,
+                        isMinimized: false,
+                        zIndex: state.nextZIndex
+                    }
                 },
                 nextZIndex: state.nextZIndex + 1
             };
