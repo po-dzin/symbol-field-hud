@@ -112,3 +112,52 @@ export const calculateGeometry = (xpValue, mode, time) => {
         pulseAmplitude: amp_i
     };
 };
+
+// --- Glyph Engine ---
+
+/**
+ * Calculate glyph visual parameters based on mode, tone, XP, and time
+ * @param {string} mode - 'DEEP' | 'FLOW' | 'LUMA'
+ * @param {string} toneId - Tone identifier
+ * @param {number} xpValue - XP value
+ * @param {number} time - Current time in milliseconds
+ * @returns {object} Glyph parameters { w, c, b, phi }
+ */
+export const calculateGlyphParams = (mode, toneId, xpValue, time) => {
+    // 5.1 Mode → Glyph
+    let w = 1.0; // Thickness
+    let c = 0.0; // Curvature
+    let b = 0.0; // Breaks
+    let phi = 0.0; // Rotation (radians)
+
+    if (mode === 'DEEP') {
+        w = 1.5; // Thicker lines
+        b = 0.3; // More breaks (fragmented)
+    } else if (mode === 'FLOW') {
+        c = 0.8; // High curvature (flowing)
+        w = 0.8; // Thinner lines
+    } else if (mode === 'LUMA') {
+        b = 0.1; // Minimal breaks (clean)
+        // phi rotates over time
+        phi = (time / 1000) * 0.5; // 0.5 rad/sec rotation
+    }
+
+    // 5.2 Tone → Glyph (thickness modulation by attention)
+    // w = w_0 * (1 + kappa * Attention)
+    // Simplified: using constant attention of 0.5
+    const attention = 0.5;
+    const kappa = 0.2;
+    w = w * (1 + kappa * attention);
+
+    // 5.3 XP → Glyph (rotation speed increases with XP)
+    // phi_i(t) = phi_0 + omega * x_i * t
+    const omega = 0.01; // Rotation coefficient
+    phi += omega * xpValue * (time / 1000);
+
+    return {
+        w,      // Thickness
+        c,      // Curvature
+        b,      // Breaks
+        phi     // Rotation (radians)
+    };
+};
