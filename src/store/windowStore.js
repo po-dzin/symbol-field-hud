@@ -1,5 +1,6 @@
 
 import { create } from 'zustand';
+import { CONSTANTS } from '../engine/harmonics';
 
 export const useWindowStore = create((set) => ({
     windows: {}, // { [id]: { id, title, glyph, isOpen, isMinimized, zIndex, position } }
@@ -44,6 +45,15 @@ export const useWindowStore = create((set) => ({
             }
         }
     })),
+
+    // Harmonic Window Sizes
+    // Agent: 2x Base Width (544px), 2x Base Height (336px)
+    // Settings: 1x Base Width (272px) -> maybe too small? Let's try 1.5x or 2x vertical.
+    // Spec says "34U x 21U or multiples".
+    // Let's use:
+    // Agent: 2W x 2H (544 x 336)
+    // Log: 2W x 2H (544 x 336)
+    // Settings: 2W x 3H (544 x 504) - needs height
 
     isCoreMinimized: false,
     coreStatus: 'SOURCE', // 'SOURCE' | 'EXIST'

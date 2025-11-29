@@ -9,7 +9,13 @@ export const CONSTANTS = {
     PHI: 1.61803398875,
     PI: Math.PI,
     E: Math.E,
-    U: 8 // Base Unit in pixels
+    U: 8, // Base Unit in pixels
+
+    // Window Grid (34U x 21U)
+    WINDOW: {
+        BASE_W: 34 * 8, // 272px
+        BASE_H: 21 * 8  // 168px
+    }
 };
 
 /**
