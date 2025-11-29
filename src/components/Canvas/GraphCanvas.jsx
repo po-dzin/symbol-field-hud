@@ -4,6 +4,7 @@ import RadialMenu from './RadialMenu';
 import { useGraphStore } from '../../store/graphStore';
 import { useStateStore } from '../../store/stateStore';
 import { useWindowStore } from '../../store/windowStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 
 // Easing function for smooth camera animation
 const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -22,6 +23,8 @@ const GraphCanvas = ({ isEditMode = false }) => {
         cancelConnection
     } = useGraphStore();
     const { mode } = useStateStore();
+    const { isUltraEnabled, harmonics } = useHarmonyStore();
+    const edgeThickness = 1.5 * (isUltraEnabled ? harmonics.modifiers.edgeThickness : 1.0);
     const { onboardingTooltip, showOnboardingTooltip } = useWindowStore();
 
     // Radial Menu State
@@ -687,7 +690,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                                     x2={x2}
                                     y2={y2}
                                     stroke={edgeColor}
-                                    strokeWidth="1.5"
+                                    strokeWidth={edgeThickness}
                                     strokeDasharray="5,5"
                                     className="opacity-60"
                                 />
