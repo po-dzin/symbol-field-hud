@@ -151,20 +151,24 @@ const MainLayout = () => {
     const { isGrayscale } = useStateStore();
 
     return (
-        <div className={`relative w-screen h-screen overflow-hidden flex transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
-            style={{ filter: isGrayscale ? 'grayscale(100%)' : 'none' }}
+        <div className={`relative w-screen h-screen overflow-hidden grid transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
+            style={{
+                filter: isGrayscale ? 'grayscale(100%)' : 'none',
+                gridTemplateColumns: 'var(--width-nav) 1fr var(--width-dock)'
+            }}
         >
-            {/* Nav Rail - Left (Now Dock) - L5 Trinity */}
-            <div className="relative z-[var(--z-trinity)]">
+            {/* Layer 0: The Infinite Canvas (Background) */}
+            <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
+                <GraphCanvas isEditMode={activeTab === 'Graph'} />
+            </div>
+
+            {/* Nav Rail - Column 1 (0.146W) */}
+            <div className="relative z-[var(--z-trinity)] col-start-1 border-r border-os-glass-border bg-os-glass/5 backdrop-blur-sm">
                 <NavRail />
             </div>
 
-            {/* Main Content Area */}
-            <main className="flex-1 relative h-full">
-                {/* Layer 1: The Infinite Canvas (Always Visible) */}
-                <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
-                    <GraphCanvas isEditMode={activeTab === 'Graph'} />
-                </div>
+            {/* Main Content Area - Spans Graph & Dock (Col 2-3) */}
+            <main className="relative h-full col-start-2 col-end-4">
 
                 {/* Layer 2: Core Overlays */}
                 <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
