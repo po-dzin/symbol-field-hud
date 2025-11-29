@@ -97,8 +97,10 @@ export const calculateColorHarmonics = (mode, toneId, xpTotal = 0) => {
 export const calculateGeometry = (xpValue, mode, time) => {
     // 3.1 Orbit Radius
     // r_i = r_0 + alpha * sqrt(x_i)
-    const r_0 = 64; // Base radius in pixels
-    const alpha = 4; // Growth coefficient
+    // Spec: Small=3U(24px), Medium=5U(40px), Large=8U(64px)
+    // Base radius (XP=0) = Small = 3U
+    const r_0 = 3 * CONSTANTS.U; // 24px
+    const alpha = 0.5; // Growth coefficient (tuned for reasonable growth)
     const r_i = r_0 + alpha * Math.sqrt(xpValue);
 
     // 3.3 Pulsation

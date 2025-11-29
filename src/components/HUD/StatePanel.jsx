@@ -76,7 +76,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Tone: ${currentTone.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
+                className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
             >
                 <div
                     className="w-5 h-5 rounded-full shadow-sm border border-white/10"
@@ -155,7 +155,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Glyph: ${currentGlyph.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+                className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-colors cursor-pointer ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                 style={isOpen ? { backgroundColor: isLuma ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)' } : {}}
             >
                 <div className={`flex items-center justify-center w-full h-full ${isLuma ? 'text-[#2A2620]' : 'text-os-text-secondary'}`} style={{ color: isOpen ? accentColor : undefined }}>

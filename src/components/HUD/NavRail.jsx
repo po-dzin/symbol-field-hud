@@ -17,7 +17,7 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, classN
         <button
             onClick={() => setActiveTab(id)}
             title={label}
-            className={`relative w-10 h-10 flex items-center justify-center transition-all duration-300 group rounded-xl cursor-pointer hover:bg-white/5 ${className}`}
+            className={`relative w-[40px] h-[40px] flex items-center justify-center transition-all duration-300 group rounded-xl cursor-pointer hover:bg-white/5 ${className}`}
             style={{
                 backgroundColor: isActive ? `${activeColor}15` : undefined
             }}
