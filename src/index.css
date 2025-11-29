@@ -49,6 +49,12 @@
   --panel-bg: rgba(4, 7, 10, 0.96);
   --panel-stroke-enhanced: rgba(170, 210, 225, 0.55);
   --panel-glow-opacity: 0.75;
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 6%;
+  --harmony-sat: 8%;
+  --harmony-glow-luma: 18%;
+  --harmony-glow-sat: 23%;
 }
 
 /* FLOW Mode */
@@ -61,6 +67,12 @@
   --canvas-bg: hsl(215, 22%, 10%);
   --panel-bg: hsl(215, 24%, 14%, 0.8);
   --grid-opacity: 0.22;
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 12%;
+  --harmony-sat: 8%;
+  --harmony-glow-luma: 24%;
+  --harmony-glow-sat: 23%;
 }
 
 /* Unified Panel Borders (v0.309.2) - Static across all modes */
@@ -145,6 +157,12 @@
 
   --surface-highlight: rgba(255, 255, 255, 0.2);
   --surface-dim: rgba(42, 38, 32, 0.1);
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 86%;
+  --harmony-sat: 35%;
+  --harmony-glow-luma: 98%;
+  --harmony-glow-sat: 50%;
 }
 
 body {
