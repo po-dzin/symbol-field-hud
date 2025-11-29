@@ -189,7 +189,7 @@ const MainLayout = () => {
                 {Object.values(useWindowStore.getState().windows)
                     .filter(w => w.isOpen && !w.isMinimized)
                     .map(win => {
-                        if (win.id.startsWith('node-properties-')) {
+                        if (win.id.startsWith('node-properties-') || win.id === 'unified-node-properties') {
                             const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
                             if (!node) return null;
 
