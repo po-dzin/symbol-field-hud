@@ -213,16 +213,8 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         const { activateNode } = useGraphStore.getState();
         activateNode(node.id);
 
-        // Singleton Pattern: Close all other node-properties windows
-        const { windows, closeWindow } = useWindowStore.getState();
-        Object.keys(windows).forEach(winId => {
-            if (winId.startsWith('node-properties-') && winId !== `node-properties-${node.id}`) {
-                closeWindow(winId);
-            }
-        });
-
-        // Open Properties Window with Unique ID
-        const windowId = `node-properties-${node.id}`;
+        // Open Properties Window with Unified ID (Singleton)
+        const windowId = 'unified-node-properties';
         openWindow(windowId, {
             title: 'PROPERTIES',
             glyph: glyphChar || (isSource ? 'SOURCE' : 'NODE'),
