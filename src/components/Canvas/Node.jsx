@@ -4,7 +4,7 @@ import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
 import { useHarmonyStore } from '../../store/harmonyStore';
-import { useHarmonyStore } from '../../store/harmonyStore';
+
 import { calculateGeometry, calculateColorHarmonics, snapToGrid } from '../../engine/harmonics';
 
 const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSourceOnboarding }) => {
