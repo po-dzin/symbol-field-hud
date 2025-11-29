@@ -13,6 +13,14 @@
   --text-secondary: #B4B9C1;
   --text-meta: #6B7280;
 
+  /* Harmonic Typography Scale (v0.1) */
+  --text-base: 16px;
+  /* 2U */
+  --text-sub: 18px;
+  /* ~2.25U */
+  --text-head: 24px;
+  /* 3U */
+
   color: var(--text-primary);
   background-color: theme('colors.os-dark');
 
