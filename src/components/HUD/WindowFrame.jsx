@@ -150,8 +150,13 @@ const WindowFrame = ({
                             {isPinned && <div className="w-1 h-1 bg-black rounded-full" />}
                         </button>
                         <button
-                            onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                // Reset Position (Return to Default)
+                                updateWindowPosition(id, { x: 100, y: 100 });
+                            }}
                             className="w-3 h-3 rounded-full bg-os-amber opacity-50 hover:opacity-100 transition-opacity"
+                            title="Reset Position"
                         />
                         <button
                             onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
