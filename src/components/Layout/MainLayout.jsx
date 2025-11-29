@@ -5,6 +5,7 @@ import GraphCanvas from '../Canvas/GraphCanvas';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 import WindowFrame from '../HUD/WindowFrame';
 import NodePropertiesWindow from '../Windows/NodePropertiesWindow';
 import AgentWindow from '../Modules/AgentWindow';
@@ -17,6 +18,7 @@ import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
 const MainLayout = () => {
     const { windows, activeTab, resetWindows } = useWindowStore();
     const { mode } = useStateStore();
+    const { isUltraEnabled, toggleUltraMode } = useHarmonyStore();
 
     useEffect(() => {
         resetWindows();
@@ -118,12 +120,12 @@ const MainLayout = () => {
                                     <div className="pt-4 border-t border-os-glass-border">
                                         <h3 className="text-os-text-primary font-bold mb-2">Experimental</h3>
                                         <div className="flex items-center justify-between text-os-text-secondary mb-3">
-                                            <span>Meta-Harmony Mode</span>
+                                            <span>Ultra-Harmony Mode</span>
                                             <button
-                                                onClick={() => useStateStore.getState().setMetaHarmony(!useStateStore.getState().metaHarmony)}
-                                                className={`w-10 h-5 rounded-full transition-colors duration-300 relative ${useStateStore.getState().metaHarmony ? 'bg-os-cyan' : 'bg-os-glass-border'}`}
+                                                onClick={toggleUltraMode}
+                                                className={`w-10 h-5 rounded-full transition-colors duration-300 relative ${isUltraEnabled ? 'bg-os-cyan' : 'bg-os-glass-border'}`}
                                             >
-                                                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300 ${useStateStore.getState().metaHarmony ? 'left-6' : 'left-1'}`} />
+                                                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300 ${isUltraEnabled ? 'left-6' : 'left-1'}`} />
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between text-os-text-secondary">
