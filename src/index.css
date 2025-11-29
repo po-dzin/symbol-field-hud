@@ -33,6 +33,31 @@
   --z-trinity: 5000;
   /* Always on top */
   --z-ritual: 6000;
+
+  /* Harmonic Grid System (v0.1) */
+  --unit: 8px;
+
+  /* Layout Proportions (vw based) */
+  --width-nav: 14.6vw;
+  --width-graph: 61.8vw;
+  --width-dock: 23.6vw;
+
+  /* Vertical Proportions (vh based) */
+  --height-header: 14.6vh;
+  --height-body: 70.8vh;
+  --height-footer: 14.6vh;
+
+  /* Standard Sizes */
+  --size-btn: 40px;
+  /* 5U */
+  --size-btn-mini: 16px;
+  /* 2U */
+  --size-node-s: 24px;
+  /* 3U */
+  --size-node-m: 40px;
+  /* 5U */
+  --size-node-l: 64px;
+  /* 8U */
 }
 
 /* DEEP Mode (Default Dark) */

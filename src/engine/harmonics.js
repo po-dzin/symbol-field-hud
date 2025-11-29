@@ -5,6 +5,22 @@
 
 // --- Constants ---
 
+export const CONSTANTS = {
+    PHI: 1.61803398875,
+    PI: Math.PI,
+    E: Math.E,
+    U: 8 // Base Unit in pixels
+};
+
+/**
+ * Convert grid units to pixels
+ * @param {number} u - Grid units
+ * @returns {number} Pixels
+ */
+export const toGrid = (u) => u * CONSTANTS.U;
+
+// Mode Luminance Baselines
+
 // Mode Luminance Baselines
 export const MODE_LUMA = {
     DEEP: 6,
