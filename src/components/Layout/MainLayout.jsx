@@ -169,61 +169,64 @@ const MainLayout = () => {
 
             {/* Main Content Area - Spans Graph & Dock (Col 2-3) */}
             <main className="relative h-full col-start-2 col-end-4">
-
-                {/* Layer 2: Core Overlays */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
-                    <CoreWidget />
-                </div>
-
-                {/* Layer 3: Floating Windows (Tab Content) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                    {renderTabContent()}
-                </div>
-
-                {/* Layer 4: Floating Windows (Node Properties, etc.) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                    {Object.values(useWindowStore.getState().windows)
-                        .filter(w => w.isOpen && !w.isMinimized)
-                        .map(win => {
-                            if (win.id.startsWith('node-properties-')) {
-                                const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
-                                if (!node) return null;
-
-                                return (
-                                    <div key={win.id} className="pointer-events-none absolute inset-0">
-                                        <WindowFrame
-                                            id={win.id}
-                                            title={win.title}
-                                            glyph={win.glyph}
-                                            initialPosition={win.position}
-                                            style={{ zIndex: win.zIndex }}
-                                        >
-                                            <NodePropertiesWindow
-                                                node={node}
-                                                onClose={() => useWindowStore.getState().closeWindow(win.id)}
-                                            />
-                                        </WindowFrame>
-                                    </div>
-                                );
-                            }
-                            return null;
-                        })
-                    }
-                </div>
-
-                {/* Layer 5: XP Summary */}
-                {activeTab === 'HUD' && (
-                    <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
-                        <XpSummaryPanel />
-                    </div>
-                )}
-
-                {/* Layer 5: Trinity (State & Time) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
-                    <StatePanel />
-                    <TimeSpiral />
-                </div>
+                {/* Content specific to the main area can go here if needed */}
             </main>
+
+            {/* GLOBAL LAYERS (Overlay everything) */}
+
+            {/* Layer 2: Core Overlays */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
+                <CoreWidget />
+            </div>
+
+            {/* Layer 3: Floating Windows (Tab Content) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+                {renderTabContent()}
+            </div>
+
+            {/* Layer 4: Floating Windows (Node Properties, etc.) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+                {Object.values(useWindowStore.getState().windows)
+                    .filter(w => w.isOpen && !w.isMinimized)
+                    .map(win => {
+                        if (win.id.startsWith('node-properties-')) {
+                            const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
+                            if (!node) return null;
+
+                            return (
+                                <div key={win.id} className="pointer-events-none absolute inset-0">
+                                    <WindowFrame
+                                        id={win.id}
+                                        title={win.title}
+                                        glyph={win.glyph}
+                                        initialPosition={win.position}
+                                        style={{ zIndex: win.zIndex }}
+                                    >
+                                        <NodePropertiesWindow
+                                            node={node}
+                                            onClose={() => useWindowStore.getState().closeWindow(win.id)}
+                                        />
+                                    </WindowFrame>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })
+                }
+            </div>
+
+            {/* Layer 5: XP Summary */}
+            {activeTab === 'HUD' && (
+                <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
+                    <XpSummaryPanel />
+                </div>
+            )}
+
+            {/* Layer 5: Trinity (State & Time) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
+                <StatePanel />
+                <TimeSpiral />
+            </div>
         </div>
     );
 };
