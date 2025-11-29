@@ -161,3 +161,58 @@ export const calculateGlyphParams = (mode, toneId, xpValue, time) => {
         phi     // Rotation (radians)
     };
 };
+
+// --- Ultra-Harmony Engine ---
+
+// Ultra-Harmony Influence Matrix H[a,b]
+// Rows: Source (Influencer), Cols: Target (Influenced)
+// Order: Mode, Tone, Glyph, XP, Time, Graph
+export const INFLUENCE_MATRIX = {
+    mode: { mode: 1.0, tone: 0.8, glyph: 0.6, xp: 0.2, time: 0.3, graph: 0.2 },
+    tone: { mode: 0.2, tone: 1.0, glyph: 0.5, xp: 0.4, time: 0.3, graph: 0.1 },
+    glyph: { mode: 0.1, tone: 0.2, glyph: 1.0, xp: 0.2, time: 0.1, graph: 0.4 },
+    xp: { mode: 0.1, tone: 0.3, glyph: 0.3, xp: 1.0, time: 0.6, graph: 0.5 },
+    time: { mode: 0.1, tone: 0.2, glyph: 0.2, xp: 0.5, time: 1.0, graph: 0.4 },
+    graph: { mode: 0.1, tone: 0.2, glyph: 0.3, xp: 0.4, time: 0.4, graph: 1.0 }
+};
+
+/**
+ * Calculate Ultra-Harmony state with cross-system influences
+ * @param {object} baseState - Base state { mode, tone, xp_total, time }
+ * @param {boolean} isUltraEnabled - Whether Ultra-Harmony mode is active
+ * @returns {object} State with modifiers { ...baseState, modifiers }
+ */
+export const calculateUltraState = (baseState, isUltraEnabled) => {
+    if (!isUltraEnabled) {
+        return {
+            ...baseState,
+            modifiers: { edgeThickness: 1, glowIntensity: 1 }
+        };
+    }
+
+    // Apply influence matrix logic
+    // For v0.1: Tone influences Graph (edge thickness), XP influences glow
+
+    const { mode, tone, xp_total } = baseState;
+
+    // Tone → Graph influence
+    // If tone is active (not void), increase edge thickness
+    const toneInfluence = (tone && tone !== 'void')
+        ? INFLUENCE_MATRIX.tone.graph
+        : 0;
+    const edgeThicknessMultiplier = 1 + toneInfluence;
+
+    // XP → Mode/Glow influence
+    // Higher XP = stronger glow
+    const xpInfluence = Math.min(xp_total / 1000, 1) * INFLUENCE_MATRIX.xp.mode;
+    const glowIntensityMultiplier = 1 + xpInfluence;
+
+    return {
+        ...baseState,
+        modifiers: {
+            edgeThickness: edgeThicknessMultiplier,
+            glowIntensity: glowIntensityMultiplier
+        }
+    };
+};
+
