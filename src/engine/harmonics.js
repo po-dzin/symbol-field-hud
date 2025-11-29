@@ -25,6 +25,13 @@ export const CONSTANTS = {
  */
 export const toGrid = (u) => u * CONSTANTS.U;
 
+/**
+ * Snap value to nearest grid unit (U=8px)
+ * @param {number} value - Value to snap
+ * @returns {number} Snapped value
+ */
+export const snapToGrid = (value) => Math.round(value / CONSTANTS.U) * CONSTANTS.U;
+
 // Mode Luminance Baselines
 
 // Mode Luminance Baselines

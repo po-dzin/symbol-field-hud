@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import Draggable from 'react-draggable';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, TONES } from '../../store/stateStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
+import { snapToGrid } from '../../engine/harmonics';
 import { clsx } from 'clsx';
 
 const WindowFrame = ({
@@ -17,6 +19,7 @@ const WindowFrame = ({
 }) => {
     const { focusWindow, minimizeWindow, closeWindow, updateWindowPosition, toggleWindowPin, windows } = useWindowStore();
     const { toneId } = useStateStore();
+    const { isHarmonicLockEnabled } = useHarmonyStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const nodeRef = useRef(null);
 
@@ -64,11 +67,16 @@ const WindowFrame = ({
 
             const newX = e.clientX - dragOffset.x;
             const newY = e.clientY - dragOffset.y;
-            const newPos = { x: newX, y: newY };
+
+            // Apply Harmonic Lock Snapping
+            const finalX = isHarmonicLockEnabled ? snapToGrid(newX) : newX;
+            const finalY = isHarmonicLockEnabled ? snapToGrid(newY) : newY;
+
+            const newPos = { x: finalX, y: finalY };
 
             // Direct DOM update for performance (bypassing React render cycle)
-            nodeRef.current.style.left = `${newX}px`;
-            nodeRef.current.style.top = `${newY}px`;
+            nodeRef.current.style.left = `${finalX}px`;
+            nodeRef.current.style.top = `${finalY}px`;
 
             positionRef.current = newPos; // Keep ref updated
         };
