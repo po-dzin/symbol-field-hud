@@ -3,6 +3,8 @@ import { clsx } from 'clsx';
 import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
+import { calculateGeometry, calculateColorHarmonics } from '../../engine/harmonics';
 
 const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboarding }) => {
     const { entity, components, state } = node;
@@ -213,8 +215,21 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
     const isJoyful = timeSinceActivation < 60000; // 1 minute
     const joyIntensity = Math.max(0, 1 - (timeSinceActivation / 60000));
 
-    // Glow intensity: softer in HUD mode, active in Graph mode
-    const glowIntensity = isEditMode ? 1.0 : 0.65;
+    // --- HARMONY ENGINE INTEGRATION ---
+    const { isUltraEnabled, harmonics: globalHarmonics } = useHarmonyStore();
+
+    // Calculate node-specific harmonics
+    const xpTotal = (components.xp?.hp || 0) + (components.xp?.ep || 0) + (components.xp?.mp || 0) + (components.xp?.sp || 0) + (components.xp?.np || 0);
+    const geom = calculateGeometry(xpTotal, mode, now);
+    const colorHarmonics = calculateColorHarmonics(mode, toneId || 'void', xpTotal);
+
+    // Map Harmony outputs to visual props
+    // Harmonic scale relative to base 64px radius
+    const harmonicScale = geom.currentRadius / 64;
+
+    // Glow intensity: base * ultra modifier
+    const baseGlowIntensity = isEditMode ? 1.0 : 0.65;
+    const glowIntensity = baseGlowIntensity * (isUltraEnabled ? globalHarmonics.modifiers.glowIntensity : 1.0);
     const hudContrast = isEditMode ? 1.0 : 0.9;
 
     // 2.71D Glassy Liquid Pointcloud Crystal Style (MORE BRIGHT)
@@ -231,7 +246,7 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
         `,
         backdropFilter: `blur(${8 + blurAmount}px)`,
         filter: `blur(${blurAmount}px) brightness(${brightnessFactor})`,
-        transform: `scale(${sizeFactor})`,
+        transform: `scale(${sizeFactor * harmonicScale})`, // Apply harmonic scale
         transition: 'all 2s ease-out'
     };
 
