@@ -277,12 +277,14 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
             // 4. Auto-open properties for the new Core node
             setTimeout(() => {
-                const { openWindow } = useWindowStore.getState();
-                openWindow(`node-properties-${nodeId}`, {
-                    title: 'PROPERTIES',
-                    glyph: 'CORE',
-                    data: { id: nodeId }
-                });
+                setTimeout(() => {
+                    const { openWindow } = useWindowStore.getState();
+                    openWindow('unified-node-properties', {
+                        title: 'PROPERTIES',
+                        glyph: 'CORE',
+                        data: { id: nodeId }
+                    });
+                }, 100);
             }, 100);
         }, 500);
     };
@@ -394,13 +396,13 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
                 // Singleton: Close other node-properties windows
                 Object.keys(windows).forEach(winId => {
-                    if (winId.startsWith('node-properties-')) {
+                    if (winId.startsWith('unified-node-properties')) {
                         closeWindow(winId);
                     }
                 });
 
                 // Open window for new node
-                const windowId = `node-properties-${newNodeId}`;
+                const windowId = 'unified-node-properties';
                 openWindow(windowId, {
                     title: 'PROPERTIES',
                     glyph: 'NODE',

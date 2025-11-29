@@ -157,7 +157,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                 // Auto-open properties
                 setTimeout(() => {
                     const { openWindow } = useWindowStore.getState();
-                    openWindow(`node-properties-${node.id}`, {
+                    openWindow('unified-node-properties', {
                         title: 'PROPERTIES',
                         glyph: 'CORE',
                         data: { id: node.id }
@@ -225,7 +225,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
 
     // Check if properties window is open for this node
     const { windows } = useWindowStore();
-    const isWindowOpen = windows[`node-properties-${node.id}`]?.isOpen;
+    const isWindowOpen = windows['unified-node-properties']?.isOpen && windows['unified-node-properties']?.data?.id === node.id;
 
     const handleContextMenu = (e) => {
         e.preventDefault();
