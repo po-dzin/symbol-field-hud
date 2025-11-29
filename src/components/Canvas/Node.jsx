@@ -4,13 +4,15 @@ import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
 import { useHarmonyStore } from '../../store/harmonyStore';
-import { calculateGeometry, calculateColorHarmonics } from '../../engine/harmonics';
+import { useHarmonyStore } from '../../store/harmonyStore';
+import { calculateGeometry, calculateColorHarmonics, snapToGrid } from '../../engine/harmonics';
 
-const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboarding }) => {
+const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSourceOnboarding }) => {
     const { entity, components, state } = node;
     const { mode } = useStateStore();
-    const { startConnection, endConnection, transformSourceToCore } = useGraphStore();
+    const { startConnection, endConnection, transformSourceToCore, updateNodePosition } = useGraphStore();
     const { openWindow } = useWindowStore();
+    const { isHarmonicLockEnabled } = useHarmonyStore();
 
     // Force re-render every 10 seconds for aging animation
     const [, forceUpdate] = useState(0);
@@ -63,13 +65,63 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
     };
     const accentRGB = hexToRgb(activeColor);
 
+    // Drag State
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartRef = React.useRef({ x: 0, y: 0 });
+    const nodeStartRef = React.useRef({ x: 0, y: 0 });
+
     const handleMouseDown = (e) => {
-        if (!isEditMode) return; // Block shift-click connections in HUD mode
+        if (!isEditMode) return; // Block interactions in HUD mode
+
+        // Shift+Click = Connection
         if (e.shiftKey) {
             e.stopPropagation();
             startConnection(node.id, node.position);
+            return;
         }
+
+        // Normal Click = Drag Start
+        e.stopPropagation(); // Prevent canvas panning
+        setIsDragging(true);
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
+        nodeStartRef.current = { ...node.position };
     };
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+
+            const dx = (e.clientX - dragStartRef.current.x) / scale;
+            const dy = (e.clientY - dragStartRef.current.y) / scale;
+
+            let newX = nodeStartRef.current.x + dx;
+            let newY = nodeStartRef.current.y + dy;
+
+            // Apply Harmonic Lock
+            if (isHarmonicLockEnabled) {
+                newX = snapToGrid(newX);
+                newY = snapToGrid(newY);
+            }
+
+            updateNodePosition(node.id, { x: newX, y: newY });
+        };
+
+        const handleMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, isHarmonicLockEnabled, scale, node.id, updateNodePosition]);
 
     const handleMouseUp = (e) => {
         // Don't end connection if we are the source (allows click-move-click workflow)
@@ -130,6 +182,12 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
 
     const handleClick = (e) => {
         e.stopPropagation();
+
+        // Prevent click if we just dragged (simple threshold check could be added if needed, 
+        // but for now relying on isDragging state might be tricky since it clears on mouseup.
+        // A common pattern is to check distance moved.)
+        const dist = Math.hypot(e.clientX - dragStartRef.current.x, e.clientY - dragStartRef.current.y);
+        if (dist > 5) return; // It was a drag, not a click
 
         // SOURCE NODE: Ignore single click (waiting for double-click to materialize)
         if (isSource) {

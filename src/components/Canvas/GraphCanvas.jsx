@@ -751,6 +751,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                         key={node.id}
                         node={node}
                         isEditMode={isEditMode}
+                        scale={camera.scale}
                         onClick={handleNodeClick}
                         onSourceOnboarding={handleSourceOnboarding}
                         onRightClick={(nodeId, position) => {
