@@ -13,6 +13,7 @@ import {
 export const useHarmonyStore = create((set, get) => ({
     // State
     isUltraEnabled: false,
+    isHarmonicLockEnabled: false,
 
     baseState: {
         mode: 'DEEP', // 'DEEP' | 'FLOW' | 'LUMA'
@@ -48,6 +49,11 @@ export const useHarmonyStore = create((set, get) => ({
             };
         });
     },
+
+    /**
+     * Toggle Harmonic Lock (Grid Snapping)
+     */
+    toggleHarmonicLock: () => set(state => ({ isHarmonicLockEnabled: !state.isHarmonicLockEnabled })),
 
     /**
      * Update base state (mode, tone, XP, etc.) and recalculate harmonics

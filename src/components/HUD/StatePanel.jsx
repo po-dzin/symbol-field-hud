@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, MODES, TONES, GLYPHS } from '../../store/stateStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 
 const Tooltip = ({ text }) => (
     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 border border-white/10 rounded text-[10px] text-white whitespace-nowrap pointer-events-none z-50">
@@ -193,6 +194,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
 const StatePanel = () => {
     const { activeTab } = useWindowStore();
     const { mode, toneId, glyphId, setMode, setTone, setGlyph } = useStateStore();
+    const { isHarmonicLockEnabled, toggleHarmonicLock } = useHarmonyStore();
 
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -243,6 +245,19 @@ const StatePanel = () => {
                     <ToneSelector currentToneId={toneId} onSelect={setTone} accentColor={activeColor} mode={mode} />
                     <GlyphSelector currentGlyphId={glyphId} onSelect={setGlyph} accentColor={activeColor} mode={mode} />
                 </div>
+
+                <div className={`w-px h-8 ${mode === 'LUMA' ? 'bg-black/10' : 'bg-white/10'}`} />
+
+                {/* HARMONIC LOCK */}
+                <button
+                    onClick={toggleHarmonicLock}
+                    title={isHarmonicLockEnabled ? "Harmonic Lock: ON" : "Harmonic Lock: OFF"}
+                    className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isHarmonicLockEnabled ? (mode === 'LUMA' ? 'bg-black/5' : 'bg-white/10') : (mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
+                >
+                    <span className={`text-xl font-serif italic ${isHarmonicLockEnabled ? (mode === 'LUMA' ? 'text-[#2A2620]' : 'text-white') : 'text-os-text-secondary'}`} style={{ color: isHarmonicLockEnabled ? activeColor : undefined }}>
+                        ϕ
+                    </span>
+                </button>
 
                 {/* Removed Duplicate Settings Dot */}
             </div>
