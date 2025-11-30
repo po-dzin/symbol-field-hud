@@ -3,11 +3,11 @@ import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, TONES } from '../../store/stateStore';
 
 const NAV_ITEMS = [
-    { id: 'HUD', label: 'HUD', icon: <span className="block -mt-1">⍜</span> },
-    { id: 'Graph', label: 'Graph', icon: <span className="block">◎</span> },
-    { id: 'Agent', label: 'Agent', icon: <span className="block text-xl font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span> },
-    { id: 'Log', label: 'Log', icon: <span className="block">≡</span> },
-    { id: 'Settings', label: 'Settings', icon: <span className="block text-2xl font-bold leading-none -mt-1">∴</span> }
+    { id: 'HUD', label: 'HUD', icon: <span className="block text-2xl">⍜</span> },
+    { id: 'Graph', label: 'Graph', icon: <span className="block text-2xl">◎</span> },
+    { id: 'Agent', label: 'Agent', icon: <span className="block text-2xl font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span> },
+    { id: 'Log', label: 'Log', icon: <span className="block text-2xl">≡</span> },
+    { id: 'Settings', label: 'Settings', icon: <span className="block text-2xl font-bold leading-none">∴</span> }
 ];
 
 const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, className = '' }) => {
@@ -109,14 +109,14 @@ const NavRail = () => {
             onClickCapture={focusDock}
         >
             {/* Fixed Icon Strip (Left) */}
-            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center py-6 gap-4 z-20 bg-transparent">
-                {/* Toggle Button (Top of Strip) */}
+            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
+                {/* Toggle Button (Top of Strip - Absolute) */}
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleNavCollapse();
                     }}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all mb-2 ${!isNavCollapsed ? 'rotate-180' : ''}`}
+                    className={`absolute top-6 w-8 h-8 flex items-center justify-center rounded-full text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all ${!isNavCollapsed ? 'rotate-180' : ''}`}
                     title={isNavCollapsed ? "Expand" : "Collapse"}
                 >
                     ›
