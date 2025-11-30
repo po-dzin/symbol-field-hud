@@ -167,10 +167,15 @@ const MainLayout = () => {
                 <NavRail />
             </div >
 
-            {/* Main Content Area - Spans Graph & Dock (Col 2-3) */}
-            < main className="relative h-full col-start-2 col-end-4" >
+            {/* Main Content Area - Spans Graph Only (Col 2) */}
+            <main className="relative h-full col-start-2 col-end-3">
                 {/* Content specific to the main area can go here if needed */}
-            </main >
+            </main>
+
+            {/* Right Dock - Time Spiral (Col 3) */}
+            <div className="relative z-[var(--z-trinity)] col-start-3 border-l border-os-glass-border bg-os-glass/5 backdrop-blur-sm">
+                <TimeSpiral />
+            </div>
 
             {/* GLOBAL LAYERS (Overlay everything) */}
 
@@ -224,10 +229,9 @@ const MainLayout = () => {
                 )
             }
 
-            {/* Layer 5: Trinity (State & Time) */}
+            {/* Layer 5: Trinity (State) */}
             <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
                 <StatePanel />
-                <TimeSpiral />
             </div>
         </div >
     );
