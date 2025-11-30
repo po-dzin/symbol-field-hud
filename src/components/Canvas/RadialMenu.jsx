@@ -75,16 +75,16 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
 
     return (
         <>
-            {/* Backdrop to catch clicks outside */}
+            {/* Backdrop to catch clicks outside - must be highest z-index */}
             <div
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 z-[9998]"
                 onClick={onClose}
                 style={{ background: 'transparent' }}
             />
 
             {/* Radial Menu Container */}
             <div
-                className="absolute z-50 pointer-events-none"
+                className="absolute z-[9999] pointer-events-none"
                 style={{
                     left: position.x,
                     top: position.y,
