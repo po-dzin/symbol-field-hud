@@ -210,7 +210,7 @@ const StatePanel = () => {
     // StatePanel always visible (removed activeTab guard)
 
     return (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="absolute top-6 right-6 z-30 pointer-events-auto">
             <div
                 className="flex items-center gap-4 px-5 h-[72px] backdrop-blur-xl transition-all duration-300 cursor-default"
                 style={{
