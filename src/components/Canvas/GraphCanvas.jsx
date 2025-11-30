@@ -170,15 +170,18 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
         console.log('⚡ Quick Connect: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
 
-        // Apply universal repulsion
-        const safePos = calculateSafePosition(initialX, initialY);
-
-        addNode(safePos, tempConnection.sourceId);
-
-        // Release lock after a short delay
-        setTimeout(() => {
-            isCreatingNode.current = false;
-        }, 100);
+        try {
+            // Apply universal repulsion
+            const safePos = calculateSafePosition(initialX, initialY);
+            addNode(safePos, tempConnection.sourceId);
+        } catch (error) {
+            console.error('❌ Failed to create connected node:', error);
+        } finally {
+            // Release lock
+            setTimeout(() => {
+                isCreatingNode.current = false;
+            }, 100);
+        }
     };
 
     // Zoom handler
@@ -384,39 +387,41 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
         console.log('✨ Double-click: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
 
-        // Apply universal repulsion
-        const safePos = calculateSafePosition(initialX, initialY);
+        try {
+            // Apply universal repulsion
+            const safePos = calculateSafePosition(initialX, initialY);
 
-        const newNodeId = addNode(safePos);
+            const newNodeId = addNode(safePos);
 
-        // Auto-open properties window for newly created node
-        if (newNodeId) {
+            // Auto-open properties window for newly created node
+            if (newNodeId) {
+                setTimeout(() => {
+                    const { openWindow, windows, closeWindow } = useWindowStore.getState();
+
+                    // Singleton: Close other node-properties windows
+                    Object.keys(windows).forEach(winId => {
+                        if (winId.startsWith('unified-node-properties')) {
+                            closeWindow(winId);
+                        }
+                    });
+
+                    // Open window for new node
+                    const windowId = 'unified-node-properties';
+                    openWindow(windowId, {
+                        title: 'PROPERTIES',
+                        glyph: 'NODE',
+                        data: { id: newNodeId }
+                    });
+                }, 0);
+            }
+        } catch (error) {
+            console.error('❌ Failed to create node:', error);
+        } finally {
+            // Release lock after a short delay
             setTimeout(() => {
-                const { openWindow, windows, closeWindow } = useWindowStore.getState();
-
-                // Singleton: Close other node-properties windows
-                Object.keys(windows).forEach(winId => {
-                    if (winId.startsWith('unified-node-properties')) {
-                        closeWindow(winId);
-                    }
-                });
-
-                // Open window for new node
-                const windowId = 'unified-node-properties';
-                openWindow(windowId, {
-                    title: 'PROPERTIES',
-                    glyph: 'NODE',
-                    data: { id: newNodeId }
-                });
-            }, 0);
+                isCreatingNode.current = false;
+            }, 100);
         }
-
-        // Camera NEVER moves on node creation!
-
-        // Release lock after a short delay
-        setTimeout(() => {
-            isCreatingNode.current = false;
-        }, 100);
     };
 
     // Click Canvas to Create Connected Node (Shift+Click while connecting)
