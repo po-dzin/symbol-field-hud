@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStateStore, TONES } from '../../store/stateStore';
-import { TIME_SCALES, nextTimeScale, formatTimeWindow } from '../../utils/temporal';
+import { TIME_SCALES, nextTimeScale, formatTimeWindow as formatTW } from '../../utils/temporal';
 
 const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
     const { toneId, mode } = useStateStore();
@@ -24,15 +24,25 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
         onOpenCalendar();
     };
 
+    const formatDisplay = () => {
+        if (!timeWindow) return 'N/A';
+
+        if (timeWindow.kind === 'NOW') {
+            // Show date and time for NOW mode
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+            return `${date} ${time}`;
+        }
+
+        return formatTW(timeWindow);
+    };
+
     return (
         <div
-            className="flex items-center gap-4 h-[72px] px-6 backdrop-blur-xl cursor-default pointer-events-auto"
+            className="flex items-center gap-4 backdrop-blur-xl cursor-default pointer-events-auto"
             style={{
-                background: 'var(--surface-1-bg)',
-                borderLeft: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
-                boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
-                animation: 'pulse-glow-smooth 8s ease-in-out infinite',
-                '--glow-color': `${activeColor}60`
+                background: 'transparent'
             }}
         >
             {/* NOW Anchor - 4U (32px) */}
@@ -64,7 +74,7 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                     {timeWindow.kind}
                 </span>
                 <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>
-                    {formatTimeWindow(timeWindow)}
+                    {formatDisplay()}
                 </span>
             </button>
 

@@ -168,7 +168,7 @@ const MainLayout = () => {
         <div className={`relative w-screen h-screen overflow-hidden grid transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
             style={{
                 filter: isGrayscale ? 'grayscale(100%)' : 'none',
-                gridTemplateColumns: `${isNavCollapsed ? 72 : navRailWidth}px 1fr var(--width-dock)`
+                gridTemplateColumns: `${isNavCollapsed ? 72 : navRailWidth}px 1fr`
             }}
         >
             {/* Layer 0: The Infinite Canvas (Background) */}
@@ -182,16 +182,11 @@ const MainLayout = () => {
             </div >
 
             {/* Main Content Area - Spans Graph Only (Col 2) */}
-            <div className="relative h-full col-start-2 col-end-3 flex flex-col">
+            <div className="relative h-full col-start-2 flex flex-col">
                 <main className="flex-1 relative">
                     {/* Content specific to the main area can go here if needed */}
                 </main>
-                <SystemDock />
-            </div>
-
-            {/* Right Dock - Temporal Dock (Col 3) */}
-            <div className="relative z-[var(--z-trinity)] col-start-3 border-l border-os-glass-border bg-os-glass/5 backdrop-blur-sm flex items-center justify-center">
-                <TimeChip
+                <SystemDock
                     timeWindow={temporal.timeWindow}
                     onScaleChange={handleScaleChange}
                     onOpenCalendar={handleOpenCalendar}
