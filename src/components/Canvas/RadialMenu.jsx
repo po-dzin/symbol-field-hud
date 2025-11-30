@@ -6,9 +6,9 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
     const node = nodes.find(n => n.id === nodeId);
     const isCore = node?.entity.type === 'core';
 
-    const handleClone = () => {
+    const handleCopy = () => {
         cloneNode(nodeId);
-        console.log('📋 Node cloned');
+        console.log('📋 Node copied');
         onClose();
     };
 
@@ -38,11 +38,11 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
             disabled: isCore
         },
         {
-            label: 'Clone',
+            label: 'Copy',
             angle: 30, // ↘ Bottom-right
             icon: '📋',
-            action: handleClone,
-            disabled: isCore // Cannot clone Core
+            action: handleCopy,
+            disabled: isCore // Cannot copy Core
         },
         {
             label: 'Convert',
@@ -62,15 +62,25 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
                 style={{ background: 'transparent' }}
             />
 
-            {/* Radial Menu */}
+            {/* Radial Menu Container */}
             <div
-                className="absolute z-50"
+                className="absolute z-50 pointer-events-none"
                 style={{
                     left: position.x,
                     top: position.y,
                     transform: 'translate(-50%, -50%)'
                 }}
             >
+                {/* Connection line to node (visual anchor) */}
+                <div
+                    className="absolute w-1 bg-white/20"
+                    style={{
+                        height: '30px',
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -100%)'
+                    }}
+                />
                 {/* Center indicator */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-2 h-2 bg-white/30 rounded-full" />
@@ -88,7 +98,7 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
                             onClick={btn.action}
                             disabled={btn.disabled}
                             className={`
-                                absolute flex items-center justify-center
+                                absolute flex items-center justify-center pointer-events-auto
                                 w-12 h-12 rounded-full
                                 backdrop-blur-md border
                                 transition-all duration-200
