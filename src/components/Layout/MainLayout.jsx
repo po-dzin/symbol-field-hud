@@ -16,7 +16,7 @@ import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
 
 const MainLayout = () => {
-    const { windows, activeTab, resetWindows } = useWindowStore();
+    const { windows, activeTab, resetWindows, navRailWidth } = useWindowStore();
     const { mode } = useStateStore();
     const { isUltraEnabled, toggleUltraMode } = useHarmonyStore();
 
@@ -154,7 +154,7 @@ const MainLayout = () => {
         <div className={`relative w-screen h-screen overflow-hidden grid transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
             style={{
                 filter: isGrayscale ? 'grayscale(100%)' : 'none',
-                gridTemplateColumns: 'var(--width-nav) 1fr var(--width-dock)'
+                gridTemplateColumns: `${navRailWidth}px 1fr var(--width-dock)`
             }}
         >
             {/* Layer 0: The Infinite Canvas (Background) */}
