@@ -45,16 +45,16 @@ const TimeSpiral = () => {
     // TimeSpiral always visible (removed activeTab guard)
 
     return (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+    return (
+        <div className="h-full w-full flex flex-col items-center justify-center pointer-events-auto py-6">
             <div
                 className={`
                     relative backdrop-blur-xl transition-all duration-500 ease-out flex flex-col items-center cursor-default
-                    ${expanded ? 'w-[400px] h-[140px] p-4' : 'w-[280px] h-[72px] px-6 flex-row justify-between'}
+                    ${expanded ? 'h-[400px] w-[140px] p-4' : 'h-[280px] w-[72px] py-6 justify-between'}
                 `}
                 style={{
                     background: 'var(--surface-1-bg)',
-                    border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
-                    borderRadius: 'var(--panel-radius)',
+                    borderLeft: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                     boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
                     animation: 'pulse-glow-smooth 8s ease-in-out infinite',
                     '--glow-color': `${activeColor}60`
@@ -63,7 +63,7 @@ const TimeSpiral = () => {
                 {/* Collapsed Content */}
                 {!expanded && (
                     <>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-center gap-3">
                             <div
                                 className="w-7 h-7 rounded-full flex items-center justify-center relative"
                                 title="Present Moment Anchor"
@@ -81,9 +81,9 @@ const TimeSpiral = () => {
                             >
                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: activeColor, opacity: 0.9 }} />
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold tracking-widest" style={{ color: activeColor }}>NOW</span>
-                                <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>{timeScale}</span>
+                            <div className="flex flex-col items-center">
+                                <span className="text-sm font-bold tracking-widest vertical-rl rotate-180" style={{ color: activeColor, writingMode: 'vertical-rl' }}>NOW</span>
+                                <span className="text-[10px] uppercase opacity-60 mt-1" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{timeScale}</span>
                             </div>
                         </div>
 
@@ -102,20 +102,21 @@ const TimeSpiral = () => {
                 {expanded && (
                     <>
                         {/* Header */}
-                        <div className="w-full flex items-center justify-between mb-4 px-2">
-                            <span className="text-[10px] font-bold tracking-widest text-os-text-secondary">TIME SCALE</span>
+                        {/* Header */}
+                        <div className="h-full flex flex-col items-center justify-between mb-0 py-2">
+                            <span className="text-[10px] font-bold tracking-widest text-os-text-secondary" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>TIME SCALE</span>
                             <button
                                 onClick={() => setExpanded(false)}
-                                className="w-6 h-6 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary cursor-pointer"
+                                className="w-6 h-6 rounded-full hover:bg-white/5 flex items-center justify-center text-os-text-secondary hover:text-os-text-primary cursor-pointer mt-4"
                             >
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" className="rotate-90">
                                     <path d="M6 9l6 6 6-6" />
                                 </svg>
                             </button>
                         </div>
 
                         {/* Scale Selector */}
-                        <div className="w-full flex items-center justify-between bg-black/10 rounded-xl p-1">
+                        <div className="h-full flex flex-col items-center justify-between bg-black/10 rounded-xl p-1 gap-1">
                             {TIME_SCALES.map(scale => {
                                 const isActive = timeScale === scale.id;
                                 return (
@@ -123,7 +124,7 @@ const TimeSpiral = () => {
                                         key={scale.id}
                                         onClick={() => setTimeScale(scale.id)}
                                         className={`
-                                            flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer
+                                            flex-1 px-2 rounded-lg text-xs font-medium transition-all duration-300 cursor-pointer
                                             ${isActive ? 'bg-white/10 text-white' : 'text-os-text-secondary hover:text-os-text-primary hover:bg-white/5'}
                                         `}
                                         style={isActive ? {
@@ -131,7 +132,7 @@ const TimeSpiral = () => {
                                             boxShadow: `0 0 10px ${activeColor}10`
                                         } : {}}
                                     >
-                                        {scale.id}
+                                        <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{scale.id}</span>
                                     </button>
                                 );
                             })}
