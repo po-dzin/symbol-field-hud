@@ -15,6 +15,7 @@ import TimeChip from '../HUD/TimeChip'; // Import TimeChip
 import SystemDock from '../HUD/SystemDock'; // Import SystemDock
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
+import GraphInfo from '../HUD/GraphInfo'; // Import GraphInfo
 import { defaultTimeWindow, now } from '../../utils/temporal';
 
 const MainLayout = () => {
@@ -248,6 +249,7 @@ const MainLayout = () => {
             {/* Layer 5: Trinity (State) */}
             <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
                 <StatePanel />
+                <GraphInfo />
             </div>
         </div >
     );

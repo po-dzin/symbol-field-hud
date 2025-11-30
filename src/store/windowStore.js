@@ -116,8 +116,8 @@ export const useWindowStore = create((set) => ({
                 // Use position of existing/previous properties window
                 defaultPos = existingPropertiesWindow.position;
             } else {
-                // Default to right side only if no previous window exists
-                defaultPos = { x: window.innerWidth - 550, y: 100 };
+                // Default to top-right corner
+                defaultPos = { x: window.innerWidth - 580, y: 24 };
             }
         }
 
