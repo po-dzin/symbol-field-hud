@@ -14,6 +14,10 @@ export const useWindowStore = create((set) => ({
         activeWindowId: null // Optional: deselect window when dock is focused? Or keep active? User said "click dock -> above window".
     })),
 
+    // Layout State
+    navRailWidth: window.innerWidth * 0.146, // Default 14.6vw in pixels
+    setNavRailWidth: (width) => set({ navRailWidth: width }),
+
     // Spec v0.2 State
     activeTab: 'HUD', // HUD, Graph, Log, Agent, Settings
     xpState: {
