@@ -49,7 +49,6 @@ const NavRail = () => {
     };
     const accentRGB = hexToRgb(activeColor);
 
-    return (
     // Drag Logic
     const [isDragging, setIsDragging] = React.useState(false);
 
