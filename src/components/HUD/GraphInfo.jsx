@@ -32,4 +32,3 @@ const GraphInfo = () => {
 };
 
 export default GraphInfo;
-```
