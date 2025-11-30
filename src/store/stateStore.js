@@ -31,12 +31,18 @@ export const useStateStore = create((set) => ({
     mode: 'FLOW', // DEEP, FLOW, LUMA
     toneId: 'sky',
     glyphId: 'triad',
-    timeScale: 'WEEK', // DAY, WEEK, MONTH, YEAR
+    timeScale: 'DAY', // DAY, WEEK, MONTH, YEAR
 
     setMode: (mode) => set({ mode }),
     setTone: (toneId) => set({ toneId }),
     setGlyph: (id) => set({ glyphId: id }),
     setTimeScale: (scale) => set({ timeScale: scale }),
+
+    // Temporal Navigation (v1)
+    temporal: {
+        timeWindow: { kind: 'NOW', from: new Date().toISOString().split('T')[0], to: new Date().toISOString().split('T')[0] }
+    },
+    setTimeWindow: (timeWindow) => set(state => ({ temporal: { ...state.temporal, timeWindow } })),
 
     // Meta-Harmony
     metaHarmony: false,
