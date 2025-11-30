@@ -89,7 +89,7 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                 title="Open Calendar"
             >
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className={`text-os-text-secondary transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}`}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className={`text-os-text-secondary transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
                     <path d="M18 15l-6-6-6 6" />
                 </svg>
             </button>

@@ -175,7 +175,7 @@ const NavRail = () => {
 
             {/* Content Area (Right of Strip) */}
             <div
-                className={`absolute left-[72px] top-0 bottom-0 right-0 flex flex-col p-6 transition-opacity duration-300 ${isNavCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`absolute left-[72px] top-0 bottom-0 right-0 flex flex-col p-6 overflow-hidden transition-opacity duration-300 ${isNavCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                 style={{ width: `calc(100% - 72px)` }}
             >
                 <div className="text-os-text-primary font-bold mb-4 opacity-50 tracking-widest text-xs">
