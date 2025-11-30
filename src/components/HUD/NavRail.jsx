@@ -37,7 +37,7 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, classN
 };
 
 const NavRail = () => {
-    const { activeTab, setActiveTab, dockZIndex, focusDock } = useWindowStore();
+    const { activeTab, setActiveTab, dockZIndex, focusDock, navRailWidth, setNavRailWidth } = useWindowStore();
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -50,21 +50,63 @@ const NavRail = () => {
     const accentRGB = hexToRgb(activeColor);
 
     return (
+    // Drag Logic
+    const [isDragging, setIsDragging] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+
+            // Update width
+            const newWidth = Math.max(72, Math.min(e.clientX, window.innerWidth));
+            setNavRailWidth(newWidth);
+        };
+
+        const handleMouseUp = (e) => {
+            if (!isDragging) return;
+            setIsDragging(false);
+
+            // Check for Full Screen Trigger (> 80% width)
+            if (e.clientX > window.innerWidth * 0.8) {
+                console.log('🚀 NavRail Full Screen Trigger -> Switch to HUD Mode');
+                setActiveTab('HUD');
+                // Reset width with animation (handled by CSS transition if we add it, or just snap back)
+                setNavRailWidth(window.innerWidth * 0.146);
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, setNavRailWidth, setActiveTab]);
+
+    return (
         <nav
-            className="absolute left-6 top-1/2 -translate-y-1/2 w-[72px] py-6 
-            backdrop-blur-xl flex flex-col items-center justify-center gap-4 transition-all duration-200"
+            className="absolute left-0 top-0 h-full py-6 
+            backdrop-blur-xl flex flex-col items-center justify-center gap-4 transition-all duration-75 ease-out"
             style={{
+                width: navRailWidth || '14.6vw', // Use dynamic width
                 background: 'var(--surface-1-bg)',
-                border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
-                borderRadius: 'var(--panel-radius)',
+                borderRight: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                 boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
-                animation: 'pulse-glow-smooth 8s ease-in-out infinite',
-                '--glow-color': `${activeColor}60`,
                 zIndex: dockZIndex,
-                height: 'min(320px, 60vh)'
             }}
             onClickCapture={focusDock}
         >
+            {/* Drag Handle */}
+            <div
+                className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-white/10 transition-colors z-50"
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                }}
+            />
+
             {NAV_ITEMS.map((item, index) => (
                 <NavItem
                     key={item.id}
