@@ -37,7 +37,7 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, classN
 };
 
 const NavRail = () => {
-    const { activeTab, setActiveTab, dockZIndex, focusDock, navRailWidth, setNavRailWidth } = useWindowStore();
+    const { activeTab, setActiveTab, dockZIndex, focusDock, navRailWidth, setNavRailWidth, windows, updateWindowPosition } = useWindowStore();
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -60,6 +60,16 @@ const NavRail = () => {
             // Update width
             const newWidth = Math.max(72, Math.min(e.clientX, window.innerWidth));
             setNavRailWidth(newWidth);
+
+            // Push Windows
+            Object.values(windows).forEach(win => {
+                if (win.isOpen && !win.isMinimized && !win.isStatic) {
+                    const padding = 20;
+                    if (win.position.x < newWidth + padding) {
+                        updateWindowPosition(win.id, { ...win.position, x: newWidth + padding });
+                    }
+                }
+            });
         };
 
         const handleMouseUp = (e) => {
