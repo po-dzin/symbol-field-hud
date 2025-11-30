@@ -152,8 +152,9 @@ const WindowFrame = ({
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                // Reset Position (Return to Default)
-                                updateWindowPosition(id, { x: 100, y: 100 });
+                                // Reset Position (Return to Default Dock - Right Side)
+                                // Standard width is 500px, padding ~50px
+                                updateWindowPosition(id, { x: window.innerWidth - 550, y: 100 });
                             }}
                             className="w-3 h-3 rounded-full bg-os-amber opacity-50 hover:opacity-100 transition-opacity"
                             title="Reset Position"
