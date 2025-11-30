@@ -113,36 +113,25 @@ const NavRail = () => {
             }}
             onClickCapture={focusDock}
         >
-            {/* Toggle Arrow - Bottom Position (near SystemDock) */}
+            {/* Toggle Arrow - Integrated at bottom of panel */}
             <div
-                className="absolute right-0 bottom-24 w-12 z-50 flex items-center justify-center"
-                style={{ transform: 'translateX(50%)' }}
+                className="absolute bottom-6 right-6 z-50"
             >
                 <button
-                    className={`
-                        relative z-10 w-8 h-12 flex items-center justify-center 
-                        cursor-pointer transition-all duration-300
-                        hover:bg-white/5
-                        rounded-full
-                    `}
-                    style={{
-                        background: 'var(--surface-1-bg)',
-                        border: `1px solid rgba(${accentRGB}, 0.15)`,
-                    }}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleNavCollapse();
                     }}
                 >
                     <svg
-                        width="14"
-                        height="14"
+                        width="16"
+                        height="16"
                         viewBox="0 0 16 16"
                         fill="none"
                         className="transition-transform duration-300"
                         style={{
-                            transform: isNavCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-                            opacity: 0.5
+                            transform: isNavCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
                         }}
                     >
                         <path
@@ -151,6 +140,7 @@ const NavRail = () => {
                             strokeWidth="1.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            opacity="0.5"
                         />
                     </svg>
                 </button>
