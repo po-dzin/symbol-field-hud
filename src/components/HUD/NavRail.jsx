@@ -116,28 +116,28 @@ const NavRail = () => {
             {/* Drag Handle & Toggle Button Container */}
             <div
                 className="absolute right-0 top-0 bottom-0 w-12 z-50 flex items-center justify-center"
-                onMouseDown={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    toggleNavCollapse();
-                }}
+                style={{ transform: 'translateX(50%)' }}
             >
-                {/* Arrow Button - Integrated into Dock */}
+                {/* Arrow Toggle - Thin Pill extending beyond dock edge */}
                 <button
                     className={`
-                        relative z-10 w-10 h-16 flex items-center justify-center 
+                        relative z-10 w-8 h-12 flex items-center justify-center 
                         cursor-pointer transition-all duration-300
                         hover:bg-white/5
-                        rounded-r-lg
+                        rounded-full
                     `}
+                    style={{
+                        background: 'var(--surface-1-bg)',
+                        border: `1px solid rgba(${accentRGB}, 0.15)`, // Very subtle border
+                    }}
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleNavCollapse();
                     }}
                 >
                     <svg
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         viewBox="0 0 16 16"
                         fill="none"
                         className="transition-transform duration-300"
