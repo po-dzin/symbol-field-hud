@@ -38,12 +38,13 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
 
         // Delay to avoid immediate closure on menu open
         const timer = setTimeout(() => {
-            document.addEventListener('click', handleGlobalClick);
+            // Use capture phase to intercept clicks BEFORE they reach buttons
+            document.addEventListener('click', handleGlobalClick, { capture: true });
         }, 100);
 
         return () => {
             clearTimeout(timer);
-            document.removeEventListener('click', handleGlobalClick);
+            document.removeEventListener('click', handleGlobalClick, { capture: true });
         };
     }, [onClose]);
 

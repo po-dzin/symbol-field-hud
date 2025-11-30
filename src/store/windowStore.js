@@ -116,8 +116,8 @@ export const useWindowStore = create((set) => ({
                 // Use position of existing/previous properties window
                 defaultPos = existingPropertiesWindow.position;
             } else {
-                // Default to top-right corner
-                defaultPos = { x: window.innerWidth - 580, y: 24 };
+                // Default to top-right corner (same as reset position)
+                defaultPos = { x: window.innerWidth - 550, y: 100 };
             }
         }
 
