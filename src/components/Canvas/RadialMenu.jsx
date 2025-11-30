@@ -49,7 +49,7 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
     }, [onClose]);
 
     // Radial menu positions (equilateral triangle, vertex up)
-    const buttonRadius = 72; // Harmonic: 24 × 3
+    const buttonRadius = 60;
     const buttons = [
         {
             label: 'Delete',
