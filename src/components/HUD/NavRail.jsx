@@ -37,7 +37,7 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, classN
 };
 
 const NavRail = () => {
-    const { activeTab, setActiveTab, dockZIndex, focusDock, navRailWidth, setNavRailWidth, windows, updateWindowPosition } = useWindowStore();
+    const { activeTab, setActiveTab, dockZIndex, focusDock, navRailWidth, setNavRailWidth, windows, updateWindowPosition, isNavCollapsed, toggleNavCollapse } = useWindowStore();
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -97,35 +97,53 @@ const NavRail = () => {
     return (
         <nav
             className="absolute left-0 top-0 h-full py-6 
-            backdrop-blur-xl flex flex-col items-center justify-center gap-4 transition-all duration-75 ease-out"
+            backdrop-blur-xl flex flex-col items-center justify-start gap-4 transition-all duration-300 ease-out"
             style={{
-                width: navRailWidth || '14.6vw', // Use dynamic width
+                width: isNavCollapsed ? '24px' : (navRailWidth || '14.6vw'), // Collapsed vs Dynamic width
                 background: 'var(--surface-1-bg)',
                 borderRight: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                 boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
                 zIndex: dockZIndex,
+                overflow: 'hidden' // Hide content when collapsed
             }}
             onClickCapture={focusDock}
         >
-            {/* Drag Handle */}
-            <div
-                className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-white/10 transition-colors z-50"
-                onMouseDown={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
+            {/* Toggle Button (Top) */}
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNavCollapse();
                 }}
-            />
+                className="w-full h-8 flex items-center justify-center text-os-text-secondary hover:text-os-cyan transition-colors mb-2"
+                title={isNavCollapsed ? "Expand" : "Collapse"}
+            >
+                {isNavCollapsed ? '›' : '‹'}
+            </button>
 
-            {NAV_ITEMS.map((item, index) => (
-                <NavItem
-                    key={item.id}
-                    {...item}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    activeColor={activeColor}
-                    className={index === 1 ? 'mt-0.5' : ''}
+            {/* Drag Handle (Only when open) */}
+            {!isNavCollapsed && (
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-white/10 transition-colors z-50"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                    }}
                 />
-            ))}
+            )}
+
+            {/* Nav Items (Hidden when collapsed) */}
+            <div className={`flex flex-col gap-4 transition-opacity duration-200 ${isNavCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                {NAV_ITEMS.map((item, index) => (
+                    <NavItem
+                        key={item.id}
+                        {...item}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        activeColor={activeColor}
+                        className={index === 1 ? 'mt-0.5' : ''}
+                    />
+                ))}
+            </div>
         </nav>
     );
 };
