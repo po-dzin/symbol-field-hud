@@ -26,7 +26,7 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
 
     return (
         <div
-            className="flex items-center gap-3 h-[72px] px-6 backdrop-blur-xl cursor-default pointer-events-auto"
+            className="flex items-center gap-4 h-[72px] px-6 backdrop-blur-xl cursor-default pointer-events-auto"
             style={{
                 background: 'var(--surface-1-bg)',
                 borderLeft: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
@@ -35,9 +35,9 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                 '--glow-color': `${activeColor}60`
             }}
         >
-            {/* NOW Anchor */}
+            {/* NOW Anchor - 4U (32px) */}
             <div
-                className="w-7 h-7 rounded-full flex items-center justify-center relative"
+                className="w-8 h-8 rounded-full flex items-center justify-center relative"
                 title="Present Moment"
                 style={mode === 'LUMA' ? {
                     background: `radial-gradient(circle, rgba(${accentRGB}, 0.25) 0%, rgba(250,245,235,0.9) 70%)`,
@@ -51,7 +51,7 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                     animation: 'softBreath 4.5s ease-in-out infinite'
                 }}
             >
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: activeColor, opacity: 0.9 }} />
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeColor, opacity: 0.9 }} />
             </div>
 
             {/* Scale Button */}
@@ -68,10 +68,10 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                 </span>
             </button>
 
-            {/* Calendar Dropdown */}
+            {/* Calendar Dropdown - 5U (40px) */}
             <button
                 onClick={handleOpenCalendar}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                 title="Open Calendar"
             >
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="text-os-text-secondary">
