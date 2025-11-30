@@ -45,11 +45,11 @@ const TimeSpiral = () => {
     // TimeSpiral always visible (removed activeTab guard)
 
     return (
-        <div className="h-full w-full flex flex-col items-center justify-center pointer-events-auto py-6">
+        <div className="h-full w-full flex items-center justify-center pointer-events-auto px-6">
             <div
                 className={`
-                    relative backdrop-blur-xl transition-all duration-500 ease-out flex items-center cursor-default
-                    ${expanded ? 'w-[400px] h-[140px] p-4 flex-col' : 'w-[72px] h-[280px] py-6 flex-col justify-between'}
+                    relative backdrop-blur-xl transition-all duration-500 ease-out flex items-center justify-between cursor-default
+                    ${expanded ? 'h-[400px] w-[140px] p-4 flex-col' : 'h-[72px] w-[280px] px-6'}
                 `}
                 style={{
                     background: 'var(--surface-1-bg)',
@@ -62,7 +62,7 @@ const TimeSpiral = () => {
                 {/* Collapsed Content */}
                 {!expanded && (
                     <>
-                        <div className="flex flex-col items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <div
                                 className="w-7 h-7 rounded-full flex items-center justify-center relative"
                                 title="Present Moment Anchor"
@@ -80,9 +80,9 @@ const TimeSpiral = () => {
                             >
                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: activeColor, opacity: 0.9 }} />
                             </div>
-                            <div className="flex flex-col items-center">
+                            <div className="flex flex-col">
                                 <span className="text-sm font-bold tracking-widest" style={{ color: activeColor }}>NOW</span>
-                                <span className="text-[10px] uppercase opacity-60 mt-1" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>{timeScale}</span>
+                                <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>{timeScale}</span>
                             </div>
                         </div>
 
