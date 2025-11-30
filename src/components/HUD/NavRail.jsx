@@ -56,6 +56,11 @@ const NavRail = () => {
         const handleMouseMove = (e) => {
             if (!isDragging) return;
 
+            // Auto-expand if dragging starts
+            if (isNavCollapsed) {
+                toggleNavCollapse();
+            }
+
             // Update width
             const newWidth = Math.max(72, Math.min(e.clientX, window.innerWidth));
             setNavRailWidth(newWidth);
@@ -108,6 +113,15 @@ const NavRail = () => {
             }}
             onClickCapture={focusDock}
         >
+            {/* Drag Handle (Always visible, wider hit area) */}
+            <div
+                className="absolute right-0 top-0 bottom-0 w-4 cursor-col-resize hover:bg-white/10 transition-colors z-50 -mr-2"
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                }}
+            />
+
             {/* Fixed Icon Strip (Left) */}
             <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
                 {/* Toggle Button (Top of Strip - Absolute) */}
