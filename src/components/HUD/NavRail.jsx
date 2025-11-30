@@ -3,11 +3,11 @@ import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, TONES } from '../../store/stateStore';
 
 const NAV_ITEMS = [
-    { id: 'HUD', label: 'HUD', icon: <span className="block text-2xl">⍜</span> },
-    { id: 'Graph', label: 'Graph', icon: <span className="block text-2xl">◎</span> },
-    { id: 'Agent', label: 'Agent', icon: <span className="block text-2xl font-bold" style={{ WebkitTextStroke: '0.5px currentColor' }}>𓂀</span> },
-    { id: 'Log', label: 'Log', icon: <span className="block text-2xl">≡</span> },
-    { id: 'Settings', label: 'Settings', icon: <span className="block text-2xl font-bold leading-none">∴</span> }
+    { id: 'HUD', label: 'HUD', icon: <span className="block text-[24px] leading-none">⍜</span> },
+    { id: 'Graph', label: 'Graph', icon: <span className="block text-[24px] leading-none">◎</span> },
+    { id: 'Agent', label: 'Agent', icon: <span className="block text-[24px] leading-none font-bold">𓂀</span> },
+    { id: 'Log', label: 'Log', icon: <span className="block text-[24px] leading-none">≡</span> },
+    { id: 'Settings', label: 'Settings', icon: <span className="block text-[24px] leading-none font-bold">∴</span> }
 ];
 
 const NavItem = ({ id, icon, label, activeTab, setActiveTab, activeColor, className = '' }) => {
@@ -113,39 +113,57 @@ const NavRail = () => {
             }}
             onClickCapture={focusDock}
         >
-            {/* Drag Handle (Always visible, wider hit area) */}
+            {/* Drag Handle & Toggle Button Container */}
             <div
-                className="absolute right-0 top-0 bottom-0 w-4 cursor-col-resize hover:bg-white/10 transition-colors z-50 -mr-2"
-                onMouseDown={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                }}
-            />
+                className="absolute right-0 top-0 bottom-0 w-4 z-50 flex items-center justify-center -mr-2 group/handle"
+            >
+                {/* Drag Area */}
+                <div
+                    className="absolute inset-0 cursor-col-resize"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                    }}
+                />
 
-            {/* Fixed Icon Strip (Left) */}
-            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
-                {/* Toggle Button (Top of Strip - Absolute) */}
+                {/* Toggle Button (Vertically Centered on Edge) */}
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleNavCollapse();
                     }}
-                    className={`absolute top-6 w-8 h-8 flex items-center justify-center rounded-full text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all ${!isNavCollapsed ? 'rotate-180' : ''}`}
+                    className={`
+                        relative z-50 w-6 h-12 flex items-center justify-center 
+                        bg-[var(--surface-1-bg)] border border-[rgba(var(--accent-rgb),0.35)] 
+                        rounded-r-lg -ml-[1px] shadow-lg cursor-pointer
+                        text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all
+                        ${!isNavCollapsed ? 'rotate-180' : ''}
+                    `}
+                    style={{
+                        borderColor: `rgba(${accentRGB}, 0.35)`
+                    }}
                     title={isNavCollapsed ? "Expand" : "Collapse"}
                 >
                     ›
                 </button>
+            </div>
 
+            {/* Fixed Icon Strip (Left) */}
+            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
                 {NAV_ITEMS.map((item, index) => (
-                    <NavItem
-                        key={item.id}
-                        {...item}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        activeColor={activeColor}
-                        className={index === 1 ? 'mt-0.5' : ''}
-                    />
-                ))}
+
+                    {
+                        NAV_ITEMS.map((item, index) => (
+                            <NavItem
+                                key={item.id}
+                                {...item}
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                activeColor={activeColor}
+                                className={index === 1 ? 'mt-0.5' : ''}
+                            />
+                        ))
+                    }
             </div>
 
             {/* Content Area (Right of Strip) */}
