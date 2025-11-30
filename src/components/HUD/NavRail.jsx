@@ -115,7 +115,7 @@ const NavRail = () => {
         >
             {/* Toggle Arrow - Integrated at bottom of panel */}
             <div
-                className="absolute bottom-6 right-6 z-50"
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50"
             >
                 <button
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
