@@ -45,7 +45,6 @@ const TimeSpiral = () => {
     // TimeSpiral always visible (removed activeTab guard)
 
     return (
-    return (
         <div className="h-full w-full flex flex-col items-center justify-center pointer-events-auto py-6">
             <div
                 className={`
