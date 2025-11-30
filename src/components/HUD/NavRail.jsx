@@ -137,11 +137,11 @@ const NavRail = () => {
                 >
                     <svg
                         viewBox="0 0 24 24"
-                        width="20"
-                        height="20"
+                        width="16"
+                        height="16"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="1.5"
                         className={`transition-transform duration-300 ${!isNavCollapsed ? 'rotate-180' : ''}`}
                     >
                         <path d="M9 18l6-6-6-6" />

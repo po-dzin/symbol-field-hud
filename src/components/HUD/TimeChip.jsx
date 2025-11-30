@@ -3,6 +3,7 @@ import { useStateStore, TONES } from '../../store/stateStore';
 import { TIME_SCALES, nextTimeScale, formatTimeWindow as formatTW } from '../../utils/temporal';
 
 const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
+    const [isExpanded, setIsExpanded] = React.useState(false);
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -80,12 +81,16 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
 
             {/* Calendar Dropdown - 5U (40px) */}
             <button
-                onClick={handleOpenCalendar}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                    onOpenCalendar();
+                }}
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                 title="Open Calendar"
             >
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="text-os-text-secondary">
-                    <path d="M18 15l-6-6-6 6" className="rotate-180" style={{ transformOrigin: 'center' }} />
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className={`text-os-text-secondary transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}`}>
+                    <path d="M18 15l-6-6-6 6" />
                 </svg>
             </button>
         </div>

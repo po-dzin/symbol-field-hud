@@ -3,7 +3,7 @@ import { useGraphStore } from '../../store/graphStore';
 import { useStateStore, TONES } from '../../store/stateStore';
 
 const GraphInfo = () => {
-    const { nodes, edges } = useGraphStore();
+    const { nodes, edges, interactionState } = useGraphStore();
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -21,11 +21,12 @@ const GraphInfo = () => {
 
     return (
         <div
-            className="absolute bottom-20 right-6 z-10 pointer-events-none"
+            className="absolute bottom-24 right-6 z-10 pointer-events-none"
         >
             <div className="flex flex-col gap-0.5 font-mono text-[10px] opacity-30 text-right" style={{ color: mode === 'LUMA' ? '#2A2620' : '#ffffff' }}>
                 <div>SymbolField {version}</div>
                 <div>{nodeCount} nodes · {edgeCount} edges</div>
+                {interactionState === 'CONNECTING' && <div className="text-os-cyan animate-pulse">CONNECTING...</div>}
             </div>
         </div>
     );
