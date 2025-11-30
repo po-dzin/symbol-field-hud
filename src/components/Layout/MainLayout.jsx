@@ -16,7 +16,7 @@ import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
 
 const MainLayout = () => {
-    const { windows, activeTab, resetWindows, navRailWidth } = useWindowStore();
+    const { windows, activeTab, resetWindows, navRailWidth, isNavCollapsed } = useWindowStore();
     const { mode } = useStateStore();
     const { isUltraEnabled, toggleUltraMode } = useHarmonyStore();
 
@@ -154,80 +154,84 @@ const MainLayout = () => {
         <div className={`relative w-screen h-screen overflow-hidden grid transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
             style={{
                 filter: isGrayscale ? 'grayscale(100%)' : 'none',
-                gridTemplateColumns: `${navRailWidth}px 1fr var(--width-dock)`
-            }}
+                style={{
+                filter: isGrayscale ? 'grayscale(100%)' : 'none',
+        gridTemplateColumns: `${isNavCollapsed ? 72 : navRailWidth}px 1fr var(--width-dock)`
+}}
         >
-            {/* Layer 0: The Infinite Canvas (Background) */}
-            <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
-                <GraphCanvas isEditMode={activeTab === 'Graph'} />
-            </div>
+    {/* Layer 0: The Infinite Canvas (Background) */ }
+    < div className = {`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
+        <GraphCanvas isEditMode={activeTab === 'Graph'} />
+            </div >
 
-            {/* Nav Rail - Column 1 (0.146W) */}
-            <div className="relative z-[var(--z-trinity)] col-start-1 border-r border-os-glass-border bg-os-glass/5 backdrop-blur-sm">
-                <NavRail />
-            </div>
+    {/* Nav Rail - Column 1 (0.146W) */ }
+    < div className = "relative z-[var(--z-trinity)] col-start-1 border-r border-os-glass-border bg-os-glass/5 backdrop-blur-sm" >
+        <NavRail />
+            </div >
 
-            {/* Main Content Area - Spans Graph & Dock (Col 2-3) */}
-            <main className="relative h-full col-start-2 col-end-4">
-                {/* Content specific to the main area can go here if needed */}
-            </main>
+    {/* Main Content Area - Spans Graph & Dock (Col 2-3) */ }
+    < main className = "relative h-full col-start-2 col-end-4" >
+        {/* Content specific to the main area can go here if needed */ }
+            </main >
 
-            {/* GLOBAL LAYERS (Overlay everything) */}
+    {/* GLOBAL LAYERS (Overlay everything) */ }
 
-            {/* Layer 2: Core Overlays */}
-            <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
-                <CoreWidget />
-            </div>
+{/* Layer 2: Core Overlays */ }
+<div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
+    <CoreWidget />
+</div>
 
-            {/* Layer 3: Floating Windows (Tab Content) */}
-            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                {renderTabContent()}
-            </div>
+{/* Layer 3: Floating Windows (Tab Content) */ }
+<div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+    {renderTabContent()}
+</div>
 
-            {/* Layer 4: Floating Windows (Node Properties, etc.) */}
-            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                {Object.values(useWindowStore.getState().windows)
-                    .filter(w => w.isOpen && !w.isMinimized)
-                    .map(win => {
-                        if (win.id.startsWith('node-properties-') || win.id === 'unified-node-properties') {
-                            const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
-                            if (!node) return null;
+{/* Layer 4: Floating Windows (Node Properties, etc.) */ }
+<div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+    {Object.values(useWindowStore.getState().windows)
+        .filter(w => w.isOpen && !w.isMinimized)
+        .map(win => {
+            if (win.id.startsWith('node-properties-') || win.id === 'unified-node-properties') {
+                const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
+                if (!node) return null;
 
-                            return (
-                                <div key={win.id} className="pointer-events-none absolute inset-0">
-                                    <WindowFrame
-                                        id={win.id}
-                                        title={win.title}
-                                        glyph={win.glyph}
-                                        initialPosition={win.position}
-                                        style={{ zIndex: win.zIndex }}
-                                    >
-                                        <NodePropertiesWindow
-                                            node={node}
-                                            onClose={() => useWindowStore.getState().closeWindow(win.id)}
-                                        />
-                                    </WindowFrame>
-                                </div>
-                            );
-                        }
-                        return null;
-                    })
-                }
-            </div>
+                return (
+                    <div key={win.id} className="pointer-events-none absolute inset-0">
+                        <WindowFrame
+                            id={win.id}
+                            title={win.title}
+                            glyph={win.glyph}
+                            initialPosition={win.position}
+                            style={{ zIndex: win.zIndex }}
+                        >
+                            <NodePropertiesWindow
+                                node={node}
+                                onClose={() => useWindowStore.getState().closeWindow(win.id)}
+                            />
+                        </WindowFrame>
+                    </div>
+                );
+            }
+            return null;
+        })
+    }
+</div>
 
-            {/* Layer 5: XP Summary */}
-            {activeTab === 'HUD' && (
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
-                    <XpSummaryPanel />
-                </div>
-            )}
-
-            {/* Layer 5: Trinity (State & Time) */}
-            <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
-                <StatePanel />
-                <TimeSpiral />
-            </div>
+{/* Layer 5: XP Summary */ }
+{
+    activeTab === 'HUD' && (
+        <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
+            <XpSummaryPanel />
         </div>
+    )
+}
+
+{/* Layer 5: Trinity (State & Time) */ }
+<div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
+    <StatePanel />
+    <TimeSpiral />
+</div>
+        </div >
     );
 };
 
