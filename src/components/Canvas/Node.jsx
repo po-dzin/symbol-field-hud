@@ -73,11 +73,10 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     const handleMouseDown = (e) => {
         if (!isEditMode) return; // Block interactions in HUD mode
 
-        // Shift+Click = Connection
+        // Shift+Click = Connection (handled in handleClick, not here)
         if (e.shiftKey) {
             e.stopPropagation();
-            startConnection(node.id, node.position);
-            return;
+            return; // Don't start drag, wait for click event
         }
 
         // Normal Click = Drag Start
