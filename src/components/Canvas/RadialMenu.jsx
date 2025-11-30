@@ -27,29 +27,29 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
         onClose();
     };
 
-    // Radial menu positions (relative to node center)
+    // Radial menu positions (equilateral triangle)
     const buttonRadius = 60;
     const buttons = [
         {
+            label: 'Delete',
+            angle: 210, // ↙ Bottom-left
+            icon: '🗑',
+            action: handleDelete,
+            disabled: isCore
+        },
+        {
             label: 'Clone',
-            angle: -90, // ↑ Top
+            angle: -30, // ↘ Bottom-right
             icon: '📋',
             action: handleClone,
             disabled: isCore // Cannot clone Core
         },
         {
             label: 'Convert',
-            angle: 0, // → Right
+            angle: 90, // ↑ Top
             icon: '🔄',
             action: handleConvert,
             disabled: isCore // Cannot convert Core
-        },
-        {
-            label: 'Delete',
-            angle: 90, // ↓ Bottom
-            icon: '🗑',
-            action: handleDelete,
-            disabled: isCore
         }
     ];
 
