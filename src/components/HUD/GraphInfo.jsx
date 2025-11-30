@@ -15,7 +15,8 @@ const GraphInfo = () => {
     const accentRGB = hexToRgb(activeColor);
 
     const version = 'v0.45';
-    const nodeCount = nodes.length;
+    // Count only Core and regular nodes (exclude Source)
+    const nodeCount = nodes.filter(n => n.entity.type !== 'source').length;
     const edgeCount = edges.length;
     const connectedNodes = nodes.filter(n => edges.some(e => e.from === n.id || e.to === n.id)).length;
 

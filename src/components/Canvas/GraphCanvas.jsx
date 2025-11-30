@@ -793,21 +793,33 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
 
             {/* Onboarding Tooltip */}
-            {onboardingTooltip && (
-                <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2
-                               px-6 py-3 bg-black/90 border border-cyan-500/60
-                               text-cyan-300 text-sm tracking-widest font-mono
-                               rounded-md shadow-lg shadow-cyan-500/20
-                               animate-fade-scale pointer-events-none"
-                    style={{
-                        zIndex: 10000,
-                        marginTop: '96px' // Harmonic: 24 × 4
-                    }}
-                >
-                    {onboardingTooltip.message}
-                </div>
-            )}
+            {onboardingTooltip && (() => {
+                // Find Core node and calculate its screen position
+                const coreNode = nodes.find(n => n.entity.type === 'core');
+                if (!coreNode) return null;
+
+                // Calculate Core position in screen coordinates
+                const screenX = coreNode.position.x * camera.scale + camera.x;
+                const screenY = coreNode.position.y * camera.scale + camera.y;
+
+                return (
+                    <div
+                        className="absolute pointer-events-none
+                                   px-6 py-3 bg-black/90 border border-cyan-500/60
+                                   text-cyan-300 text-sm tracking-widest font-mono
+                                   rounded-md shadow-lg shadow-cyan-500/20
+                                   animate-fade-scale"
+                        style={{
+                            zIndex: 10000,
+                            left: `${screenX}px`,
+                            top: `${screenY + 96}px`, // 96px below Core (24×4, harmonic)
+                            transform: 'translateX(-50%)'
+                        }}
+                    >
+                        {onboardingTooltip.message}
+                    </div>
+                );
+            })()}
 
             {/* Radial Menu */}
             {radialMenu && (
