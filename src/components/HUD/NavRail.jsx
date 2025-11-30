@@ -113,12 +113,11 @@ const NavRail = () => {
             }}
             onClickCapture={focusDock}
         >
-            {/* Drag Handle & Toggle Button Container */}
+            {/* Toggle Arrow - Bottom Position (near SystemDock) */}
             <div
-                className="absolute right-0 top-0 bottom-0 w-12 z-50 flex items-center justify-center"
+                className="absolute right-0 bottom-24 w-12 z-50 flex items-center justify-center"
                 style={{ transform: 'translateX(50%)' }}
             >
-                {/* Arrow Toggle - Thin Pill extending beyond dock edge */}
                 <button
                     className={`
                         relative z-10 w-8 h-12 flex items-center justify-center 
@@ -128,7 +127,7 @@ const NavRail = () => {
                     `}
                     style={{
                         background: 'var(--surface-1-bg)',
-                        border: `1px solid rgba(${accentRGB}, 0.15)`, // Very subtle border
+                        border: `1px solid rgba(${accentRGB}, 0.15)`,
                     }}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -155,7 +154,16 @@ const NavRail = () => {
                         />
                     </svg>
                 </button>
-            </div>{/* Fixed Icon Strip (Left) */}
+            </div>
+
+            {/* Drag Handle for Resizing */}
+            <div
+                className="absolute right-0 top-0 bottom-0 w-1 z-40 cursor-col-resize hover:bg-white/20 transition-colors"
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                }}
+            />{/* Fixed Icon Strip (Left) */}
             <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
                 {NAV_ITEMS.map((item, index) => (
                     <NavItem
