@@ -11,15 +11,28 @@ import NodePropertiesWindow from '../Windows/NodePropertiesWindow';
 import AgentWindow from '../Modules/AgentWindow';
 
 import StatePanel from '../HUD/StatePanel'; // Import StatePanel
-import TimeSpiral from '../HUD/TimeSpiral'; // Import TimeSpiral
+import TimeChip from '../HUD/TimeChip'; // Import TimeChip
 import SystemDock from '../HUD/SystemDock'; // Import SystemDock
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
 
 const MainLayout = () => {
     const { windows, activeTab, resetWindows, navRailWidth, isNavCollapsed } = useWindowStore();
-    const { mode } = useStateStore();
+    const { mode, temporal, setTimeWindow } = useStateStore();
     const { isUltraEnabled, toggleUltraMode } = useHarmonyStore();
+
+    // Temporal Dock handlers
+    const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+
+    const handleScaleChange = (newKind) => {
+        const { defaultTimeWindow, now } = require('../utils/temporal');
+        const newWindow = defaultTimeWindow(newKind, now());
+        setTimeWindow(newWindow);
+    };
+
+    const handleOpenCalendar = () => {
+        setIsCalendarOpen(true);
+    };
 
     useEffect(() => {
         resetWindows();
@@ -176,9 +189,13 @@ const MainLayout = () => {
                 <SystemDock />
             </div>
 
-            {/* Right Dock - Time Spiral (Col 3) */}
-            <div className="relative z-[var(--z-trinity)] col-start-3 border-l border-os-glass-border bg-os-glass/5 backdrop-blur-sm">
-                <TimeSpiral />
+            {/* Right Dock - Temporal Dock (Col 3) */}
+            <div className="relative z-[var(--z-trinity)] col-start-3 border-l border-os-glass-border bg-os-glass/5 backdrop-blur-sm flex items-center justify-center">
+                <TimeChip
+                    timeWindow={temporal.timeWindow}
+                    onScaleChange={handleScaleChange}
+                    onOpenCalendar={handleOpenCalendar}
+                />
             </div>
 
             {/* GLOBAL LAYERS (Overlay everything) */}
