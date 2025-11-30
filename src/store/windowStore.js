@@ -17,6 +17,8 @@ export const useWindowStore = create((set) => ({
     // Layout State
     navRailWidth: window.innerWidth * 0.146, // Default 14.6vw in pixels
     setNavRailWidth: (width) => set({ navRailWidth: width }),
+    isNavCollapsed: true, // Default collapsed
+    toggleNavCollapse: () => set((state) => ({ isNavCollapsed: !state.isNavCollapsed })),
 
     // Spec v0.2 State
     activeTab: 'HUD', // HUD, Graph, Log, Agent, Settings
