@@ -790,16 +790,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                 </div>
             )}
 
-            {/* Canvas Status */}
-            <div className="absolute bottom-6 right-6 text-xs font-mono text-os-text-meta opacity-50 pointer-events-none">
-                GRAPH MODE // v0.4 (Pure CSS)
-                <br />
-                NODES: {nodes.length} | EDGES: {edges.length}
-                <br />
-                ZOOM: {camera.scale.toFixed(2)}
-                <br />
-                {interactionState === 'CONNECTING' && <span className="text-os-cyan animate-pulse">CONNECTING...</span>}
-            </div>
+
 
             {/* Onboarding Tooltip */}
             {onboardingTooltip && (
