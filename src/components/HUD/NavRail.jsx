@@ -151,19 +151,16 @@ const NavRail = () => {
             {/* Fixed Icon Strip (Left) */}
             <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
                 {NAV_ITEMS.map((item, index) => (
-
-                    {
-                        NAV_ITEMS.map((item, index) => (
-                            <NavItem
-                                key={item.id}
-                                {...item}
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
-                                activeColor={activeColor}
-                                className={index === 1 ? 'mt-0.5' : ''}
-                            />
-                        ))
-                    }
+                    <NavItem
+                        key={item.id}
+                        {...item}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        activeColor={activeColor}
+                        className={index === 1 ? 'mt-0.5' : ''}
+                    />
+                ))
+                }
             </div>
 
             {/* Content Area (Right of Strip) */}
