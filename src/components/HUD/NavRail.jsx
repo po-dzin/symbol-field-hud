@@ -133,9 +133,9 @@ const NavRail = () => {
                         toggleNavCollapse();
                     }}
                     className={`
-                        relative z-50 w-6 h-12 flex items-center justify-center 
+                        relative z-50 w-8 h-16 flex items-center justify-center 
                         bg-[var(--surface-1-bg)] border border-[rgba(var(--accent-rgb),0.35)] 
-                        rounded-r-lg -ml-[1px] shadow-lg cursor-pointer
+                        rounded-full shadow-lg cursor-pointer
                         text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all
                         ${!isNavCollapsed ? 'rotate-180' : ''}
                     `}
