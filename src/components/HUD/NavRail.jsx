@@ -113,39 +113,6 @@ const NavRail = () => {
             }}
             onClickCapture={focusDock}
         >
-            {/* Toggle Arrow - Integrated at bottom of panel */}
-            <div
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50"
-            >
-                <button
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        toggleNavCollapse();
-                    }}
-                >
-                    <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        className="transition-transform duration-300"
-                        style={{
-                            transform: isNavCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
-                        }}
-                    >
-                        <path
-                            d="M6 12L10 8L6 4"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            opacity="0.5"
-                        />
-                    </svg>
-                </button>
-            </div>
-
             {/* Drag Handle for Resizing */}
             <div
                 className="absolute right-0 top-0 bottom-0 w-1 z-40 cursor-col-resize hover:bg-white/20 transition-colors"
