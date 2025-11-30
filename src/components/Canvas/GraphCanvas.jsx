@@ -802,7 +802,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                                animate-fade-scale pointer-events-none"
                     style={{
                         zIndex: 10000,
-                        marginTop: '100px' // Offset below Core node
+                        marginTop: '96px' // Harmonic: 24 × 4
                     }}
                 >
                     {onboardingTooltip.message}
