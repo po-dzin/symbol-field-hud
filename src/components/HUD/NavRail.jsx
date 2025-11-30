@@ -109,7 +109,7 @@ const NavRail = () => {
                 borderRight: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                 boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
                 zIndex: dockZIndex,
-                overflow: 'hidden'
+                overflow: 'visible'
             }}
             onClickCapture={focusDock}
         >

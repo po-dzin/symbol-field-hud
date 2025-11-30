@@ -21,14 +21,15 @@ const GraphInfo = () => {
 
     return (
         <div
-            className="absolute bottom-4 right-4 z-10 pointer-events-none"
+            className="absolute bottom-4 left-4 z-10 pointer-events-none"
         >
-            <div className="flex flex-col gap-0.5 text-right font-mono text-[10px] opacity-40" style={{ color: mode === 'LUMA' ? '#2A2620' : '#ffffff' }}>
-                <div>SF {version}</div>
-                <div>{nodeCount}N · {edgeCount}E · {connectedNodes}C</div>
+            <div className="flex flex-col gap-0.5 font-mono text-[10px] opacity-30" style={{ color: mode === 'LUMA' ? '#2A2620' : '#ffffff' }}>
+                <div>SymbolField {version}</div>
+                <div>{nodeCount} nodes · {edgeCount} edges</div>
             </div>
         </div>
     );
 };
 
 export default GraphInfo;
+```
