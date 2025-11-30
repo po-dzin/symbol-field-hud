@@ -15,6 +15,7 @@ import TimeChip from '../HUD/TimeChip'; // Import TimeChip
 import SystemDock from '../HUD/SystemDock'; // Import SystemDock
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
+import { defaultTimeWindow, now } from '../../utils/temporal';
 
 const MainLayout = () => {
     const { windows, activeTab, resetWindows, navRailWidth, isNavCollapsed } = useWindowStore();
@@ -25,7 +26,6 @@ const MainLayout = () => {
     const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
 
     const handleScaleChange = (newKind) => {
-        const { defaultTimeWindow, now } = require('../utils/temporal');
         const newWindow = defaultTimeWindow(newKind, now());
         setTimeWindow(newWindow);
     };
