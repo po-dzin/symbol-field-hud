@@ -97,42 +97,31 @@ const NavRail = () => {
     return (
         <nav
             className="absolute left-0 top-0 h-full py-6 
-            backdrop-blur-xl flex flex-col items-center justify-start gap-4 transition-all duration-300 ease-out"
+            backdrop-blur-xl flex flex-col items-start justify-start transition-all duration-300 ease-out"
             style={{
-                width: isNavCollapsed ? '24px' : (navRailWidth || '14.6vw'), // Collapsed vs Dynamic width
+                width: isNavCollapsed ? '72px' : (navRailWidth || '14.6vw'), // Collapsed (Icons) vs Dynamic
                 background: 'var(--surface-1-bg)',
                 borderRight: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                 boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
                 zIndex: dockZIndex,
-                overflow: 'hidden' // Hide content when collapsed
+                overflow: 'hidden'
             }}
             onClickCapture={focusDock}
         >
-            {/* Toggle Button (Top) */}
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    toggleNavCollapse();
-                }}
-                className="w-full h-8 flex items-center justify-center text-os-text-secondary hover:text-os-cyan transition-colors mb-2"
-                title={isNavCollapsed ? "Expand" : "Collapse"}
-            >
-                {isNavCollapsed ? '›' : '‹'}
-            </button>
-
-            {/* Drag Handle (Only when open) */}
-            {!isNavCollapsed && (
-                <div
-                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-white/10 transition-colors z-50"
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        setIsDragging(true);
+            {/* Fixed Icon Strip (Left) */}
+            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center py-6 gap-4 z-20 bg-transparent">
+                {/* Toggle Button (Top of Strip) */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleNavCollapse();
                     }}
-                />
-            )}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all mb-2 ${!isNavCollapsed ? 'rotate-180' : ''}`}
+                    title={isNavCollapsed ? "Expand" : "Collapse"}
+                >
+                    ›
+                </button>
 
-            {/* Nav Items (Hidden when collapsed) */}
-            <div className={`flex flex-col gap-4 transition-opacity duration-200 ${isNavCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 {NAV_ITEMS.map((item, index) => (
                     <NavItem
                         key={item.id}
@@ -143,6 +132,20 @@ const NavRail = () => {
                         className={index === 1 ? 'mt-0.5' : ''}
                     />
                 ))}
+            </div>
+
+            {/* Content Area (Right of Strip) */}
+            <div
+                className={`absolute left-[72px] top-0 bottom-0 right-0 flex flex-col p-6 transition-opacity duration-300 ${isNavCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                style={{ width: `calc(100% - 72px)` }}
+            >
+                <div className="text-os-text-primary font-bold mb-4 opacity-50 tracking-widest text-xs">
+                    {activeTab.toUpperCase()} VIEW
+                </div>
+                {/* Placeholder for future content (Chat, Logs, etc.) */}
+                <div className="flex-1 rounded-xl border border-dashed border-white/10 flex items-center justify-center text-os-text-secondary text-sm">
+                    {activeTab} Content Area
+                </div>
             </div>
         </nav>
     );
