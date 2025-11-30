@@ -107,10 +107,10 @@ export const useWindowStore = create((set) => ({
         let defaultPos = { x: 100 + cascadeOffset, y: 100 + cascadeOffset };
 
         // Specific positioning for Node Properties
-        if (id.startsWith('node-properties-')) {
+        if (id.includes('properties')) {
             // Check if any other node-properties window exists to preserve position
             const existingPropertiesWindow = Object.values(state.windows)
-                .find(w => w.id.startsWith('node-properties-'));
+                .find(w => w.id.includes('properties'));
 
             if (existingPropertiesWindow && existingPropertiesWindow.position) {
                 // Use position of existing/previous properties window
