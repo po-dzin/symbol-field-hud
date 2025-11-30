@@ -795,12 +795,15 @@ const GraphCanvas = ({ isEditMode = false }) => {
             {/* Onboarding Tooltip */}
             {onboardingTooltip && (
                 <div
-                    className="absolute top-[60%] left-1/2 -translate-x-1/2
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2
                                px-6 py-3 bg-black/90 border border-cyan-500/60
                                text-cyan-300 text-sm tracking-widest font-mono
                                rounded-md shadow-lg shadow-cyan-500/20
                                animate-fade-scale pointer-events-none"
-                    style={{ zIndex: 10000 }}
+                    style={{
+                        zIndex: 10000,
+                        marginTop: '80px' // Offset below Core node
+                    }}
                 >
                     {onboardingTooltip.message}
                 </div>
