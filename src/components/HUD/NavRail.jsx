@@ -119,7 +119,7 @@ const NavRail = () => {
                 onMouseDown={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    handleToggle();
+                    toggleNavCollapse();
                 }}
             >
                 {/* Arrow Button - Integrated into Dock */}
@@ -127,12 +127,12 @@ const NavRail = () => {
                     className={`
                         relative z-10 w-10 h-16 flex items-center justify-center 
                         cursor-pointer transition-all duration-300
-                        ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}
+                        hover:bg-white/5
                         rounded-r-lg
                     `}
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleToggle();
+                        toggleNavCollapse();
                     }}
                 >
                     <svg
