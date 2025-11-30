@@ -12,6 +12,7 @@ import AgentWindow from '../Modules/AgentWindow';
 
 import StatePanel from '../HUD/StatePanel'; // Import StatePanel
 import TimeSpiral from '../HUD/TimeSpiral'; // Import TimeSpiral
+import SystemDock from '../HUD/SystemDock'; // Import SystemDock
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
 
@@ -168,9 +169,12 @@ const MainLayout = () => {
             </div >
 
             {/* Main Content Area - Spans Graph Only (Col 2) */}
-            <main className="relative h-full col-start-2 col-end-3">
-                {/* Content specific to the main area can go here if needed */}
-            </main>
+            <div className="relative h-full col-start-2 col-end-3 flex flex-col">
+                <main className="flex-1 relative">
+                    {/* Content specific to the main area can go here if needed */}
+                </main>
+                <SystemDock />
+            </div>
 
             {/* Right Dock - Time Spiral (Col 3) */}
             <div className="relative z-[var(--z-trinity)] col-start-3 border-l border-os-glass-border bg-os-glass/5 backdrop-blur-sm">
