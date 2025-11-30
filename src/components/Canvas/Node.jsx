@@ -73,6 +73,9 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     const handleMouseDown = (e) => {
         if (!isEditMode) return; // Block interactions in HUD mode
 
+        // Always record start position for click vs drag detection
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
+
         // Shift+Click = Connection (handled in handleClick, not here)
         if (e.shiftKey) {
             e.stopPropagation();
@@ -82,7 +85,6 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         // Normal Click = Drag Start
         e.stopPropagation(); // Prevent canvas panning
         setIsDragging(true);
-        dragStartRef.current = { x: e.clientX, y: e.clientY };
         nodeStartRef.current = { ...node.position };
     };
 
