@@ -115,25 +115,17 @@ const NavRail = () => {
         >
             {/* Drag Handle & Toggle Button Container */}
             <div
-                className="absolute right-0 top-0 bottom-0 w-4 z-50 flex items-center justify-center -mr-2 group/handle"
+                className="absolute right-0 top-0 bottom-0 w-12 z-50 flex items-center justify-center"
+                style={{ transform: 'translateX(50%)' }}
             >
-                {/* Drag Area */}
-                <div
-                    className="absolute inset-0 cursor-col-resize"
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        setIsDragging(true);
-                    }}
-                />
-
-                {/* Toggle Button (Vertically Centered on Edge) */}
+                {/* Toggle Button (Fully visible outside NavRail) */}
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleNavCollapse();
                     }}
                     className={`
-                        relative z-50 w-10 h-16 flex items-center justify-center 
+                        relative z-10 w-10 h-16 flex items-center justify-center 
                         bg-[var(--surface-1-bg)] border border-[rgba(var(--accent-rgb),0.35)] 
                         rounded-full shadow-lg cursor-pointer
                         text-os-text-secondary hover:text-os-cyan hover:bg-white/5 transition-all
@@ -155,6 +147,15 @@ const NavRail = () => {
                         <path d="M9 18l6-6-6-6" />
                     </svg>
                 </button>
+
+                {/* Drag Area (Behind button) */}
+                <div
+                    className="absolute inset-0 cursor-col-resize -z-10"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                    }}
+                />
             </div>
 
             {/* Fixed Icon Strip (Left) */}

@@ -21,40 +21,11 @@ const GraphInfo = () => {
 
     return (
         <div
-            className="absolute bottom-6 right-6 z-30 pointer-events-auto"
+            className="absolute bottom-4 right-4 z-10 pointer-events-none"
         >
-            <div
-                className="flex flex-col gap-1 px-4 py-3 backdrop-blur-xl transition-all duration-300 cursor-default"
-                style={{
-                    background: 'var(--surface-1-bg)',
-                    border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.25)`,
-                    borderRadius: 'var(--panel-radius)',
-                    boxShadow: `0 0 12px rgba(${accentRGB}, 0.15)`
-                }}
-            >
-                <div className="text-[10px] uppercase tracking-widest opacity-50 mb-1" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>
-                    SYSTEM
-                </div>
-
-                <div className="flex items-center justify-between gap-6">
-                    <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>Version</span>
-                    <span className="text-xs font-medium" style={{ color: activeColor }}>{version}</span>
-                </div>
-
-                <div className="flex items-center justify-between gap-6">
-                    <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>Nodes</span>
-                    <span className="text-xs font-medium" style={{ color: activeColor }}>{nodeCount}</span>
-                </div>
-
-                <div className="flex items-center justify-between gap-6">
-                    <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>Edges</span>
-                    <span className="text-xs font-medium" style={{ color: activeColor }}>{edgeCount}</span>
-                </div>
-
-                <div className="flex items-center justify-between gap-6">
-                    <span className="text-[10px] uppercase opacity-60" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>Connected</span>
-                    <span className="text-xs font-medium" style={{ color: activeColor }}>{connectedNodes}</span>
-                </div>
+            <div className="flex flex-col gap-0.5 text-right font-mono text-[10px] opacity-40" style={{ color: mode === 'LUMA' ? '#2A2620' : '#ffffff' }}>
+                <div>SF {version}</div>
+                <div>{nodeCount}N · {edgeCount}E · {connectedNodes}C</div>
             </div>
         </div>
     );
