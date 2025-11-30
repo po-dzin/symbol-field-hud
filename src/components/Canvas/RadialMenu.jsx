@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGraphStore } from '../../store/graphStore';
 
 const RadialMenu = ({ nodeId, position, onClose }) => {
@@ -26,6 +26,26 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
         deleteNode(nodeId);
         onClose();
     };
+
+    // Close menu on any click anywhere
+    useEffect(() => {
+        const handleGlobalClick = (e) => {
+            // Check if click is outside menu buttons
+            if (!e.target.closest('button[data-radial-menu]')) {
+                onClose();
+            }
+        };
+
+        // Delay to avoid immediate closure on menu open
+        const timer = setTimeout(() => {
+            document.addEventListener('click', handleGlobalClick);
+        }, 100);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleGlobalClick);
+        };
+    }, [onClose]);
 
     // Radial menu positions (equilateral triangle, vertex up)
     const buttonRadius = 60;
@@ -71,16 +91,6 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
                     transform: 'translate(-50%, -50%)'
                 }}
             >
-                {/* Connection line to node (visual anchor) */}
-                <div
-                    className="absolute w-1 bg-white/20"
-                    style={{
-                        height: '30px',
-                        left: '50%',
-                        top: '50%',
-                        transform: 'translate(-50%, -100%)'
-                    }}
-                />
                 {/* Center indicator */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-2 h-2 bg-white/30 rounded-full" />
@@ -97,6 +107,7 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
                             key={idx}
                             onClick={btn.action}
                             disabled={btn.disabled}
+                            data-radial-menu="true"
                             className={`
                                 absolute flex items-center justify-center pointer-events-auto
                                 w-12 h-12 rounded-full

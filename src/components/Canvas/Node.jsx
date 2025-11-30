@@ -232,11 +232,12 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         e.preventDefault();
         e.stopPropagation();
 
-        // Get screen position for radial menu
-        const screenX = e.clientX;
-        const screenY = e.clientY;
+        // Calculate node center in screen coordinates
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-        onRightClick && onRightClick(node.id, { x: screenX, y: screenY });
+        onRightClick && onRightClick(node.id, { x: centerX, y: centerY });
     };
 
     // Aging System
