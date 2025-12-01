@@ -142,7 +142,7 @@ export const useWindowStore = create((set) => ({
     closeWindow: (id) => set((state) => ({
         windows: {
             ...state.windows,
-            [id]: { ...state.windows[id], isOpen: false }
+            [id]: { ...state.windows[id], isOpen: false, isMinimized: false }
         }
     })),
 
@@ -152,6 +152,19 @@ export const useWindowStore = create((set) => ({
             [id]: { ...state.windows[id], isMinimized: true }
         },
         activeWindowId: null
+    })),
+
+    restoreWindow: (id) => set((state) => ({
+        activeWindowId: id,
+        windows: {
+            ...state.windows,
+            [id]: {
+                ...state.windows[id],
+                isMinimized: false,
+                zIndex: state.nextZIndex
+            }
+        },
+        nextZIndex: state.nextZIndex + 1
     })),
 
     focusWindow: (id) => set((state) => ({

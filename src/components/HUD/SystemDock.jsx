@@ -1,10 +1,11 @@
 import React from 'react';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, TONES } from '../../store/stateStore';
+import WindowChip from './WindowChip';
 import TimeChip from './TimeChip';
 
 const SystemDock = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
-    const { windows, restoreWindow } = useWindowStore();
+    const { windows, restoreWindow, closeWindow } = useWindowStore();
     const { toneId, mode } = useStateStore();
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -36,27 +37,12 @@ const SystemDock = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
                     </div>
                 ) : (
                     minimizedWindows.map(win => (
-                        <button
+                        <WindowChip
                             key={win.id}
-                            onClick={() => restoreWindow(win.id)}
-                            className="group relative flex items-center gap-2 transition-all duration-300 hover:-translate-y-1"
-                            title={`Restore ${win.title}`}
-                        >
-                            {/* Window Icon */}
-                            <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-300"
-                                style={{
-                                    background: 'var(--surface-1-bg)',
-                                    borderColor: `rgba(${accentRGB}, 0.3)`,
-                                    boxShadow: `0 4px 12px rgba(0,0,0,0.2)`
-                                }}
-                            >
-                                <span className="text-xl" style={{ color: activeColor }}>{win.glyph}</span>
-                            </div>
-
-                            {/* Active Indicator */}
-                            <div className="w-1 h-1 rounded-full bg-os-text-secondary opacity-50" />
-                        </button>
+                            window={win}
+                            onRestore={restoreWindow}
+                            onClose={closeWindow}
+                        />
                     ))
                 )}
             </div>

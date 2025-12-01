@@ -121,18 +121,50 @@ const NavRail = () => {
                     setIsDragging(true);
                 }}
             />{/* Fixed Icon Strip (Left) */}
-            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center py-6 gap-8 z-20 bg-transparent">
-                {NAV_ITEMS.map((item, index) => (
-                    <NavItem
-                        key={item.id}
-                        {...item}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        activeColor={activeColor}
-                        className={index === 1 ? 'mt-0.5' : ''}
-                    />
-                ))
-                }
+            <div className="absolute left-0 top-0 bottom-0 w-[72px] flex flex-col items-center justify-center z-20 bg-transparent pointer-events-none">
+                <div className="pointer-events-auto flex flex-col py-6 gap-8">
+                    {NAV_ITEMS.map((item, index) => (
+                        <NavItem
+                            key={item.id}
+                            {...item}
+                            activeTab={activeTab}
+                            setActiveTab={setActiveTab}
+                            activeColor={activeColor}
+                            className={index === 1 ? 'mt-0.5' : ''}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Toggle Arrow at Bottom - Fixed Position */}
+            <div className="absolute left-0 bottom-6 w-[72px] flex justify-center z-30">
+                <button
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleNavCollapse();
+                    }}
+                >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="transition-transform duration-300"
+                        style={{
+                            transform: isNavCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
+                        }}
+                    >
+                        <path
+                            d="M6 12L10 8L6 4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            opacity="0.5"
+                        />
+                    </svg>
+                </button>
             </div>
 
             {/* Content Area (Right of Strip) */}

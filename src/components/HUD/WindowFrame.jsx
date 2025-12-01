@@ -143,26 +143,21 @@ const WindowFrame = ({
                 {!isStatic && (
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={(e) => { e.stopPropagation(); toggleWindowPin(id); }}
-                            className={`w-3 h-3 rounded-full flex items-center justify-center transition-all ${isPinned ? 'bg-os-cyan opacity-100' : 'bg-white/20 opacity-50 hover:opacity-100'}`}
-                            title={isPinned ? "Unpin" : "Pin"}
+                            onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
+                            className="w-3 h-3 rounded-full bg-yellow-500 flex items-center justify-center transition-all group overflow-hidden"
+                            title="Minimize"
                         >
-                            {isPinned && <div className="w-1 h-1 bg-black rounded-full" />}
+                            <div className="w-2 h-0.5 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                         <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Reset Position (Return to Default Dock - Right Side)
-                                // Standard width is 500px, padding ~50px
-                                updateWindowPosition(id, { x: window.innerWidth - 550, y: 100 });
-                            }}
-                            className="w-3 h-3 rounded-full bg-os-amber opacity-50 hover:opacity-100 transition-opacity"
-                            title="Reset Position"
-                        />
-                        <button
                             onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
-                            className="w-3 h-3 rounded-full bg-red-500 opacity-50 hover:opacity-100 transition-opacity"
-                        />
+                            className="w-3 h-3 rounded-full bg-red-500 flex items-center justify-center transition-all group overflow-hidden"
+                            title="Close"
+                        >
+                            <svg width="6" height="6" viewBox="0 0 8 8" fill="none" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <path d="M1 1L7 7M7 1L1 7" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </button>
                     </div>
                 )}
             </div>

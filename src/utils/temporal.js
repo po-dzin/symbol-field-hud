@@ -1,5 +1,4 @@
 export const TIME_SCALES = [
-    { id: 'NOW', label: 'Now', kind: 'NOW' },
     { id: 'DAY', label: 'Day', kind: 'DAY' },
     { id: 'WEEK', label: 'Week', kind: 'WEEK' },
     { id: 'MONTH', label: 'Month', kind: 'MONTH' },
@@ -20,9 +19,6 @@ export function defaultTimeWindow(kind, nowDate = now()) {
     const date = new Date(nowDate);
 
     switch (kind) {
-        case 'NOW':
-            return { kind, from: nowDate, to: nowDate };
-
         case 'DAY':
             return { kind, from: nowDate, to: nowDate };
 
@@ -48,8 +44,18 @@ export function defaultTimeWindow(kind, nowDate = now()) {
             };
 
         default:
-            return { kind: 'NOW', from: nowDate, to: nowDate };
+            return { kind: 'DAY', from: nowDate, to: nowDate };
     }
+}
+
+/**
+ * Helper to format date as YYYY-MM-DD using local time
+ */
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 /**
@@ -61,7 +67,7 @@ export function startOfWeek(dateStr) {
     const diff = (day === 0 ? -6 : 1) - day; // Monday = 1
     const monday = new Date(date);
     monday.setDate(date.getDate() + diff);
-    return monday.toISOString().split('T')[0];
+    return formatDate(monday);
 }
 
 /**
@@ -69,8 +75,9 @@ export function startOfWeek(dateStr) {
  */
 export function endOfWeek(dateStr) {
     const start = new Date(startOfWeek(dateStr));
-    start.setDate(start.getDate() + 6);
-    return start.toISOString().split('T')[0];
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return formatDate(end);
 }
 
 /**
@@ -78,7 +85,7 @@ export function endOfWeek(dateStr) {
  */
 export function startOfMonth(dateStr) {
     const date = new Date(dateStr);
-    return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+    return formatDate(new Date(date.getFullYear(), date.getMonth(), 1));
 }
 
 /**
@@ -86,7 +93,7 @@ export function startOfMonth(dateStr) {
  */
 export function endOfMonth(dateStr) {
     const date = new Date(dateStr);
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+    return formatDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
 }
 
 /**
@@ -94,7 +101,7 @@ export function endOfMonth(dateStr) {
  */
 export function startOfYear(dateStr) {
     const date = new Date(dateStr);
-    return new Date(date.getFullYear(), 0, 1).toISOString().split('T')[0];
+    return formatDate(new Date(date.getFullYear(), 0, 1));
 }
 
 /**
@@ -102,14 +109,14 @@ export function startOfYear(dateStr) {
  */
 export function endOfYear(dateStr) {
     const date = new Date(dateStr);
-    return new Date(date.getFullYear(), 11, 31).toISOString().split('T')[0];
+    return formatDate(new Date(date.getFullYear(), 11, 31));
 }
 
 /**
  * Cycle to next time scale
  */
 export function nextTimeScale(currentKind) {
-    const scales = ['NOW', 'DAY', 'WEEK', 'MONTH', 'YEAR'];
+    const scales = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
     const currentIndex = scales.indexOf(currentKind);
     const nextIndex = (currentIndex + 1) % scales.length;
     return scales[nextIndex];
