@@ -5,18 +5,35 @@ import GraphCanvas from '../Canvas/GraphCanvas';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 import WindowFrame from '../HUD/WindowFrame';
 import NodePropertiesWindow from '../Windows/NodePropertiesWindow';
 import AgentWindow from '../Modules/AgentWindow';
 
 import StatePanel from '../HUD/StatePanel'; // Import StatePanel
-import TimeSpiral from '../HUD/TimeSpiral'; // Import TimeSpiral
+import TimeChip from '../HUD/TimeChip'; // Import TimeChip
+import SystemDock from '../HUD/SystemDock'; // Import SystemDock
 import CoreWidget from '../HUD/CoreWidget'; // Import CoreWidget
 import XpSummaryPanel from '../HUD/XpSummaryPanel'; // Import XpSummaryPanel
+import GraphInfo from '../HUD/GraphInfo'; // Import GraphInfo
+import { defaultTimeWindow, now } from '../../utils/temporal';
 
 const MainLayout = () => {
-    const { windows, activeTab, resetWindows } = useWindowStore();
-    const { mode } = useStateStore();
+    const { windows, activeTab, resetWindows, navRailWidth, isNavCollapsed } = useWindowStore();
+    const { mode, temporal, setTimeWindow } = useStateStore();
+    const { isUltraEnabled, toggleUltraMode } = useHarmonyStore();
+
+    // Temporal Dock handlers
+    const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+
+    const handleScaleChange = (newKind) => {
+        const newWindow = defaultTimeWindow(newKind, now());
+        setTimeWindow(newWindow);
+    };
+
+    const handleOpenCalendar = () => {
+        setIsCalendarOpen(true);
+    };
 
     useEffect(() => {
         resetWindows();
@@ -118,12 +135,12 @@ const MainLayout = () => {
                                     <div className="pt-4 border-t border-os-glass-border">
                                         <h3 className="text-os-text-primary font-bold mb-2">Experimental</h3>
                                         <div className="flex items-center justify-between text-os-text-secondary mb-3">
-                                            <span>Meta-Harmony Mode</span>
+                                            <span>Ultra-Harmony Mode</span>
                                             <button
-                                                onClick={() => useStateStore.getState().setMetaHarmony(!useStateStore.getState().metaHarmony)}
-                                                className={`w-10 h-5 rounded-full transition-colors duration-300 relative ${useStateStore.getState().metaHarmony ? 'bg-os-cyan' : 'bg-os-glass-border'}`}
+                                                onClick={toggleUltraMode}
+                                                className={`w-10 h-5 rounded-full transition-colors duration-300 relative ${isUltraEnabled ? 'bg-os-cyan' : 'bg-os-glass-border'}`}
                                             >
-                                                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300 ${useStateStore.getState().metaHarmony ? 'left-6' : 'left-1'}`} />
+                                                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300 ${isUltraEnabled ? 'left-6' : 'left-1'}`} />
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between text-os-text-secondary">
@@ -149,76 +166,92 @@ const MainLayout = () => {
     const { isGrayscale } = useStateStore();
 
     return (
-        <div className={`relative w-screen h-screen overflow-hidden flex transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
-            style={{ filter: isGrayscale ? 'grayscale(100%)' : 'none' }}
+        <div className={`relative w-screen h-screen overflow-hidden grid transition-colors duration-1000 ${getBackgroundStyle()} ${mode === 'LUMA' ? 'mode-luma' : ''} ${mode === 'FLOW' ? 'mode-flow' : ''}`}
+            style={{
+                filter: isGrayscale ? 'grayscale(100%)' : 'none',
+                gridTemplateColumns: `${isNavCollapsed ? 72 : navRailWidth}px 1fr`
+            }}
         >
-            {/* Nav Rail - Left (Now Dock) - L5 Trinity */}
-            <div className="relative z-[var(--z-trinity)]">
+            {/* Layer 0: The Infinite Canvas (Background) */}
+            < div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
+                <GraphCanvas isEditMode={activeTab === 'Graph'} />
+            </div >
+
+            {/* Nav Rail - Column 1 (0.146W) */}
+            < div className="relative z-[var(--z-trinity)] col-start-1 border-r border-os-glass-border bg-os-glass/5 backdrop-blur-sm" >
                 <NavRail />
+            </div >
+
+            {/* Main Content Area - Spans Graph Only (Col 2) */}
+            <div className="relative h-full col-start-2 flex flex-col">
+                <main className="flex-1 relative">
+                    {/* Content specific to the main area can go here if needed */}
+                </main>
+                <SystemDock
+                    timeWindow={temporal.timeWindow}
+                    onScaleChange={handleScaleChange}
+                    onOpenCalendar={handleOpenCalendar}
+                />
             </div>
 
-            {/* Main Content Area */}
-            <main className="flex-1 relative h-full">
-                {/* Layer 1: The Infinite Canvas (Always Visible) */}
-                <div className={`absolute inset-0 z-[var(--z-canvas)] ${mode === 'LUMA' ? 'opacity-100 mix-blend-normal' : 'opacity-50 mix-blend-screen'}`}>
-                    <GraphCanvas isEditMode={activeTab === 'Graph'} />
-                </div>
+            {/* GLOBAL LAYERS (Overlay everything) */}
 
-                {/* Layer 2: Core Overlays */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
-                    <CoreWidget />
-                </div>
+            {/* Layer 2: Core Overlays */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-core-overlays)]">
+                <CoreWidget />
+            </div>
 
-                {/* Layer 3: Floating Windows (Tab Content) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                    {renderTabContent()}
-                </div>
+            {/* Layer 3: Floating Windows (Tab Content) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+                {renderTabContent()}
+            </div>
 
-                {/* Layer 4: Floating Windows (Node Properties, etc.) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
-                    {Object.values(useWindowStore.getState().windows)
-                        .filter(w => w.isOpen && !w.isMinimized)
-                        .map(win => {
-                            if (win.id.startsWith('node-properties-')) {
-                                const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
-                                if (!node) return null;
+            {/* Layer 4: Floating Windows (Node Properties, etc.) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-windows)]">
+                {Object.values(useWindowStore.getState().windows)
+                    .filter(w => w.isOpen && !w.isMinimized)
+                    .map(win => {
+                        if (win.id.startsWith('node-properties-') || win.id === 'unified-node-properties') {
+                            const node = useGraphStore.getState().nodes.find(n => n.id === win.data?.id);
+                            if (!node) return null;
 
-                                return (
-                                    <div key={win.id} className="pointer-events-none absolute inset-0">
-                                        <WindowFrame
-                                            id={win.id}
-                                            title={win.title}
-                                            glyph={win.glyph}
-                                            initialPosition={win.position}
-                                            style={{ zIndex: win.zIndex }}
-                                        >
-                                            <NodePropertiesWindow
-                                                node={node}
-                                                onClose={() => useWindowStore.getState().closeWindow(win.id)}
-                                            />
-                                        </WindowFrame>
-                                    </div>
-                                );
-                            }
-                            return null;
-                        })
-                    }
-                </div>
+                            return (
+                                <div key={win.id} className="pointer-events-none absolute inset-0">
+                                    <WindowFrame
+                                        id={win.id}
+                                        title={win.title}
+                                        glyph={win.glyph}
+                                        initialPosition={win.position}
+                                        style={{ zIndex: win.zIndex }}
+                                    >
+                                        <NodePropertiesWindow
+                                            node={node}
+                                            onClose={() => useWindowStore.getState().closeWindow(win.id)}
+                                        />
+                                    </WindowFrame>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })
+                }
+            </div>
 
-                {/* Layer 5: XP Summary */}
-                {activeTab === 'HUD' && (
+            {/* Layer 5: XP Summary */}
+            {
+                activeTab === 'HUD' && (
                     <div className="absolute inset-0 pointer-events-none z-[var(--z-xp-summary)]">
                         <XpSummaryPanel />
                     </div>
-                )}
+                )
+            }
 
-                {/* Layer 5: Trinity (State & Time) */}
-                <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
-                    <StatePanel />
-                    <TimeSpiral />
-                </div>
-            </main>
-        </div>
+            {/* Layer 5: Trinity (State) */}
+            <div className="absolute inset-0 pointer-events-none z-[var(--z-trinity)]">
+                <StatePanel />
+                <GraphInfo />
+            </div>
+        </div >
     );
 };
 

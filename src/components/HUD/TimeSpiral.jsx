@@ -45,16 +45,15 @@ const TimeSpiral = () => {
     // TimeSpiral always visible (removed activeTab guard)
 
     return (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="h-full w-full flex items-center justify-center pointer-events-auto px-6">
             <div
                 className={`
-                    relative backdrop-blur-xl transition-all duration-500 ease-out flex flex-col items-center cursor-default
-                    ${expanded ? 'w-[400px] h-[140px] p-4' : 'w-[280px] h-[72px] px-6 flex-row justify-between'}
+                    relative backdrop-blur-xl transition-all duration-500 ease-out flex items-center justify-between cursor-default
+                    ${expanded ? 'h-[400px] w-[140px] p-4 flex-col' : 'h-[72px] w-[280px] px-6'}
                 `}
                 style={{
                     background: 'var(--surface-1-bg)',
-                    border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
-                    borderRadius: 'var(--panel-radius)',
+                    borderLeft: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
                     boxShadow: `0 0 20px rgba(${accentRGB}, 0.22)`,
                     animation: 'pulse-glow-smooth 8s ease-in-out infinite',
                     '--glow-color': `${activeColor}60`

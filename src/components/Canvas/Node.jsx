@@ -3,12 +3,16 @@ import { clsx } from 'clsx';
 import { useStateStore, TONES } from '../../store/stateStore';
 import { useGraphStore } from '../../store/graphStore';
 import { useWindowStore } from '../../store/windowStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 
-const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboarding }) => {
+import { calculateGeometry, calculateColorHarmonics, snapToGrid } from '../../engine/harmonics';
+
+const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSourceOnboarding }) => {
     const { entity, components, state } = node;
     const { mode } = useStateStore();
-    const { startConnection, endConnection, transformSourceToCore } = useGraphStore();
+    const { startConnection, endConnection, transformSourceToCore, updateNodePosition } = useGraphStore();
     const { openWindow } = useWindowStore();
+    const { isHarmonicLockEnabled } = useHarmonyStore();
 
     // Force re-render every 10 seconds for aging animation
     const [, forceUpdate] = useState(0);
@@ -61,13 +65,64 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
     };
     const accentRGB = hexToRgb(activeColor);
 
+    // Drag State
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartRef = React.useRef({ x: 0, y: 0 });
+    const nodeStartRef = React.useRef({ x: 0, y: 0 });
+
     const handleMouseDown = (e) => {
-        if (!isEditMode) return; // Block shift-click connections in HUD mode
+        if (!isEditMode) return; // Block interactions in HUD mode
+
+        // Always record start position for click vs drag detection
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
+
+        // Shift+Click = Connection (handled in handleClick, not here)
         if (e.shiftKey) {
             e.stopPropagation();
-            startConnection(node.id, node.position);
+            return; // Don't start drag, wait for click event
         }
+
+        // Normal Click = Drag Start
+        e.stopPropagation(); // Prevent canvas panning
+        setIsDragging(true);
+        nodeStartRef.current = { ...node.position };
     };
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+
+            const dx = (e.clientX - dragStartRef.current.x) / scale;
+            const dy = (e.clientY - dragStartRef.current.y) / scale;
+
+            let newX = nodeStartRef.current.x + dx;
+            let newY = nodeStartRef.current.y + dy;
+
+            // Apply Harmonic Lock
+            if (isHarmonicLockEnabled) {
+                newX = snapToGrid(newX);
+                newY = snapToGrid(newY);
+            }
+
+            updateNodePosition(node.id, { x: newX, y: newY });
+        };
+
+        const handleMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, isHarmonicLockEnabled, scale, node.id, updateNodePosition]);
 
     const handleMouseUp = (e) => {
         // Don't end connection if we are the source (allows click-move-click workflow)
@@ -103,7 +158,7 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
                 // Auto-open properties
                 setTimeout(() => {
                     const { openWindow } = useWindowStore.getState();
-                    openWindow(`node-properties-${node.id}`, {
+                    openWindow('unified-node-properties', {
                         title: 'PROPERTIES',
                         glyph: 'CORE',
                         data: { id: node.id }
@@ -129,6 +184,12 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
     const handleClick = (e) => {
         e.stopPropagation();
 
+        // Prevent click if we just dragged (simple threshold check could be added if needed, 
+        // but for now relying on isDragging state might be tricky since it clears on mouseup.
+        // A common pattern is to check distance moved.)
+        const dist = Math.hypot(e.clientX - dragStartRef.current.x, e.clientY - dragStartRef.current.y);
+        if (dist > 5) return; // It was a drag, not a click
+
         // SOURCE NODE: Ignore single click (waiting for double-click to materialize)
         if (isSource) {
             console.log('🌱 Source clicked - use double-click to materialize');
@@ -153,16 +214,8 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
         const { activateNode } = useGraphStore.getState();
         activateNode(node.id);
 
-        // Singleton Pattern: Close all other node-properties windows
-        const { windows, closeWindow } = useWindowStore.getState();
-        Object.keys(windows).forEach(winId => {
-            if (winId.startsWith('node-properties-') && winId !== `node-properties-${node.id}`) {
-                closeWindow(winId);
-            }
-        });
-
-        // Open Properties Window with Unique ID
-        const windowId = `node-properties-${node.id}`;
+        // Open Properties Window with Unified ID (Singleton)
+        const windowId = 'unified-node-properties';
         openWindow(windowId, {
             title: 'PROPERTIES',
             glyph: glyphChar || (isSource ? 'SOURCE' : 'NODE'),
@@ -173,17 +226,18 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
 
     // Check if properties window is open for this node
     const { windows } = useWindowStore();
-    const isWindowOpen = windows[`node-properties-${node.id}`]?.isOpen;
+    const isWindowOpen = windows['unified-node-properties']?.isOpen && windows['unified-node-properties']?.data?.id === node.id;
 
     const handleContextMenu = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Get screen position for radial menu
-        const screenX = e.clientX;
-        const screenY = e.clientY;
+        // Calculate node center in screen coordinates
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-        onRightClick && onRightClick(node.id, { x: screenX, y: screenY });
+        onRightClick && onRightClick(node.id, { x: centerX, y: centerY });
     };
 
     // Aging System
@@ -213,8 +267,21 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
     const isJoyful = timeSinceActivation < 60000; // 1 minute
     const joyIntensity = Math.max(0, 1 - (timeSinceActivation / 60000));
 
-    // Glow intensity: softer in HUD mode, active in Graph mode
-    const glowIntensity = isEditMode ? 1.0 : 0.65;
+    // --- HARMONY ENGINE INTEGRATION ---
+    const { isUltraEnabled, harmonics: globalHarmonics } = useHarmonyStore();
+
+    // Calculate node-specific harmonics
+    const xpTotal = (components.xp?.hp || 0) + (components.xp?.ep || 0) + (components.xp?.mp || 0) + (components.xp?.sp || 0) + (components.xp?.np || 0);
+    const geom = calculateGeometry(xpTotal, mode, now);
+    const colorHarmonics = calculateColorHarmonics(mode, toneId || 'void', xpTotal);
+
+    // Map Harmony outputs to visual props
+    // Harmonic scale relative to base 64px radius
+    const harmonicScale = geom.currentRadius / 64;
+
+    // Glow intensity: base * ultra modifier
+    const baseGlowIntensity = isEditMode ? 1.0 : 0.65;
+    const glowIntensity = baseGlowIntensity * (isUltraEnabled ? globalHarmonics.modifiers.glowIntensity : 1.0);
     const hudContrast = isEditMode ? 1.0 : 0.9;
 
     // 2.71D Glassy Liquid Pointcloud Crystal Style (MORE BRIGHT)
@@ -231,7 +298,7 @@ const Node = ({ node, isEditMode = false, onClick, onRightClick, onSourceOnboard
         `,
         backdropFilter: `blur(${8 + blurAmount}px)`,
         filter: `blur(${blurAmount}px) brightness(${brightnessFactor})`,
-        transform: `scale(${sizeFactor})`,
+        transform: `scale(${sizeFactor * harmonicScale})`, // Apply harmonic scale
         transition: 'all 2s ease-out'
     };
 

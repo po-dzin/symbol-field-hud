@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWindowStore } from '../../store/windowStore';
 import { useStateStore, MODES, TONES, GLYPHS } from '../../store/stateStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 
 const Tooltip = ({ text }) => (
     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 border border-white/10 rounded text-[10px] text-white whitespace-nowrap pointer-events-none z-50">
@@ -76,7 +77,7 @@ const ToneSelector = ({ currentToneId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Tone: ${currentTone.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
+                className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isOpen ? (isLuma ? 'bg-black/5' : 'bg-white/10') : (isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
             >
                 <div
                     className="w-5 h-5 rounded-full shadow-sm border border-white/10"
@@ -155,7 +156,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 title={`Current Glyph: ${currentGlyph.label}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+                className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-colors cursor-pointer ${isLuma ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                 style={isOpen ? { backgroundColor: isLuma ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)' } : {}}
             >
                 <div className={`flex items-center justify-center w-full h-full ${isLuma ? 'text-[#2A2620]' : 'text-os-text-secondary'}`} style={{ color: isOpen ? accentColor : undefined }}>
@@ -193,6 +194,7 @@ const GlyphSelector = ({ currentGlyphId, onSelect, accentColor, mode }) => {
 const StatePanel = () => {
     const { activeTab } = useWindowStore();
     const { mode, toneId, glyphId, setMode, setTone, setGlyph } = useStateStore();
+    const { isHarmonicLockEnabled, toggleHarmonicLock } = useHarmonyStore();
 
     const currentTone = TONES.find(t => t.id === toneId) || TONES[0];
     const activeColor = mode === 'LUMA' ? currentTone.lumaColor : currentTone.color;
@@ -208,7 +210,7 @@ const StatePanel = () => {
     // StatePanel always visible (removed activeTab guard)
 
     return (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="absolute top-6 left-[120px] z-30 pointer-events-auto">
             <div
                 className="flex items-center gap-4 px-5 h-[72px] backdrop-blur-xl transition-all duration-300 cursor-default"
                 style={{
@@ -243,6 +245,19 @@ const StatePanel = () => {
                     <ToneSelector currentToneId={toneId} onSelect={setTone} accentColor={activeColor} mode={mode} />
                     <GlyphSelector currentGlyphId={glyphId} onSelect={setGlyph} accentColor={activeColor} mode={mode} />
                 </div>
+
+                <div className={`w-px h-8 ${mode === 'LUMA' ? 'bg-black/10' : 'bg-white/10'}`} />
+
+                {/* HARMONIC LOCK */}
+                <button
+                    onClick={toggleHarmonicLock}
+                    title={isHarmonicLockEnabled ? "Harmonic Lock: ON" : "Harmonic Lock: OFF"}
+                    className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isHarmonicLockEnabled ? (mode === 'LUMA' ? 'bg-black/5' : 'bg-white/10') : (mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5')}`}
+                >
+                    <span className={`text-xl font-serif italic ${isHarmonicLockEnabled ? (mode === 'LUMA' ? 'text-[#2A2620]' : 'text-white') : 'text-os-text-secondary'}`} style={{ color: isHarmonicLockEnabled ? activeColor : undefined }}>
+                        ϕ
+                    </span>
+                </button>
 
                 {/* Removed Duplicate Settings Dot */}
             </div>

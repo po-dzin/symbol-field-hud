@@ -31,12 +31,23 @@ export const useStateStore = create((set) => ({
     mode: 'FLOW', // DEEP, FLOW, LUMA
     toneId: 'sky',
     glyphId: 'triad',
-    timeScale: 'WEEK', // DAY, WEEK, MONTH, YEAR
+    timeScale: 'DAY', // DAY, WEEK, MONTH, YEAR
 
     setMode: (mode) => set({ mode }),
     setTone: (toneId) => set({ toneId }),
     setGlyph: (id) => set({ glyphId: id }),
     setTimeScale: (scale) => set({ timeScale: scale }),
+
+    // Temporal Navigation (v1)
+    // Temporal Navigation (v1)
+    temporal: {
+        timeWindow: {
+            kind: 'DAY',
+            from: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD in local time
+            to: new Date().toLocaleDateString('en-CA')
+        }
+    },
+    setTimeWindow: (timeWindow) => set(state => ({ temporal: { ...state.temporal, timeWindow } })),
 
     // Meta-Harmony
     metaHarmony: false,

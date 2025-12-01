@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGraphStore } from '../../store/graphStore';
 
 const RadialMenu = ({ nodeId, position, onClose }) => {
@@ -6,9 +6,9 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
     const node = nodes.find(n => n.id === nodeId);
     const isCore = node?.entity.type === 'core';
 
-    const handleClone = () => {
+    const handleCopy = () => {
         cloneNode(nodeId);
-        console.log('📋 Node cloned');
+        console.log('📋 Node copied');
         onClose();
     };
 
@@ -27,44 +27,65 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
         onClose();
     };
 
-    // Radial menu positions (relative to node center)
+    // Close menu on any click anywhere
+    useEffect(() => {
+        const handleGlobalClick = (e) => {
+            // Check if click is outside menu buttons
+            if (!e.target.closest('button[data-radial-menu]')) {
+                onClose();
+            }
+        };
+
+        // Delay to avoid immediate closure on menu open
+        const timer = setTimeout(() => {
+            // Use capture phase to intercept clicks BEFORE they reach buttons
+            document.addEventListener('click', handleGlobalClick, { capture: true });
+        }, 100);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleGlobalClick, { capture: true });
+        };
+    }, [onClose]);
+
+    // Radial menu positions (equilateral triangle, vertex up)
     const buttonRadius = 60;
     const buttons = [
         {
-            label: 'Clone',
-            angle: -90, // ↑ Top
-            icon: '📋',
-            action: handleClone,
-            disabled: isCore // Cannot clone Core
-        },
-        {
-            label: 'Convert',
-            angle: 0, // → Right
-            icon: '🔄',
-            action: handleConvert,
-            disabled: isCore // Cannot convert Core
-        },
-        {
             label: 'Delete',
-            angle: 90, // ↓ Bottom
+            angle: 150, // ↙ Bottom-left
             icon: '🗑',
             action: handleDelete,
             disabled: isCore
+        },
+        {
+            label: 'Copy',
+            angle: 30, // ↘ Bottom-right
+            icon: '📋',
+            action: handleCopy,
+            disabled: isCore // Cannot copy Core
+        },
+        {
+            label: 'Convert',
+            angle: -90, // ↑ Top (vertex)
+            icon: '🔄',
+            action: handleConvert,
+            disabled: isCore // Cannot convert Core
         }
     ];
 
     return (
         <>
-            {/* Backdrop to catch clicks outside */}
+            {/* Backdrop to catch clicks outside - must be highest z-index */}
             <div
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 z-[9998]"
                 onClick={onClose}
                 style={{ background: 'transparent' }}
             />
 
-            {/* Radial Menu */}
+            {/* Radial Menu Container */}
             <div
-                className="absolute z-50"
+                className="absolute z-[9999] pointer-events-none"
                 style={{
                     left: position.x,
                     top: position.y,
@@ -87,8 +108,9 @@ const RadialMenu = ({ nodeId, position, onClose }) => {
                             key={idx}
                             onClick={btn.action}
                             disabled={btn.disabled}
+                            data-radial-menu="true"
                             className={`
-                                absolute flex items-center justify-center
+                                absolute flex items-center justify-center pointer-events-auto
                                 w-12 h-12 rounded-full
                                 backdrop-blur-md border
                                 transition-all duration-200

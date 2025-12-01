@@ -20,7 +20,7 @@ const XpSummaryPanel = () => {
 
     return (
         <Draggable nodeRef={nodeRef} handle=".xp-handle">
-            <div ref={nodeRef} className="absolute top-32 left-6 flex flex-col items-start gap-2 pointer-events-auto">
+            <div ref={nodeRef} className="absolute top-[120px] left-[120px] flex flex-col items-start gap-2 pointer-events-auto">
                 {/* Panel Container */}
                 <div
                     className="backdrop-blur-xl px-5 py-3 w-auto h-[72px] flex flex-wrap gap-4 justify-center items-center xp-handle cursor-grab active:cursor-grabbing"

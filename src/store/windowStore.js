@@ -1,5 +1,6 @@
 
 import { create } from 'zustand';
+import { CONSTANTS } from '../engine/harmonics';
 
 export const useWindowStore = create((set) => ({
     windows: {}, // { [id]: { id, title, glyph, isOpen, isMinimized, zIndex, position } }
@@ -12,6 +13,12 @@ export const useWindowStore = create((set) => ({
         nextZIndex: state.nextZIndex + 1,
         activeWindowId: null // Optional: deselect window when dock is focused? Or keep active? User said "click dock -> above window".
     })),
+
+    // Layout State
+    navRailWidth: window.innerWidth * 0.146, // Default 14.6vw in pixels
+    setNavRailWidth: (width) => set({ navRailWidth: width }),
+    isNavCollapsed: true, // Default collapsed
+    toggleNavCollapse: () => set((state) => ({ isNavCollapsed: !state.isNavCollapsed })),
 
     // Spec v0.2 State
     activeTab: 'HUD', // HUD, Graph, Log, Agent, Settings
@@ -45,6 +52,15 @@ export const useWindowStore = create((set) => ({
         }
     })),
 
+    // Harmonic Window Sizes
+    // Agent: 2x Base Width (544px), 2x Base Height (336px)
+    // Settings: 1x Base Width (272px) -> maybe too small? Let's try 1.5x or 2x vertical.
+    // Spec says "34U x 21U or multiples".
+    // Let's use:
+    // Agent: 2W x 2H (544 x 336)
+    // Log: 2W x 2H (544 x 336)
+    // Settings: 2W x 3H (544 x 504) - needs height
+
     isCoreMinimized: false,
     coreStatus: 'SOURCE', // 'SOURCE' | 'EXIST'
 
@@ -72,7 +88,13 @@ export const useWindowStore = create((set) => ({
                 activeWindowId: id,
                 windows: {
                     ...state.windows,
-                    [id]: { ...state.windows[id], isOpen: true, isMinimized: false, zIndex: state.nextZIndex }
+                    [id]: {
+                        ...state.windows[id],
+                        ...config, // Merge new config (title, data, glyph)
+                        isOpen: true,
+                        isMinimized: false,
+                        zIndex: state.nextZIndex
+                    }
                 },
                 nextZIndex: state.nextZIndex + 1
             };
@@ -85,16 +107,16 @@ export const useWindowStore = create((set) => ({
         let defaultPos = { x: 100 + cascadeOffset, y: 100 + cascadeOffset };
 
         // Specific positioning for Node Properties
-        if (id.startsWith('node-properties-')) {
+        if (id.includes('properties')) {
             // Check if any other node-properties window exists to preserve position
             const existingPropertiesWindow = Object.values(state.windows)
-                .find(w => w.id.startsWith('node-properties-'));
+                .find(w => w.id.includes('properties'));
 
             if (existingPropertiesWindow && existingPropertiesWindow.position) {
                 // Use position of existing/previous properties window
                 defaultPos = existingPropertiesWindow.position;
             } else {
-                // Default to right side only if no previous window exists
+                // Default to top-right corner (same as reset position)
                 defaultPos = { x: window.innerWidth - 550, y: 100 };
             }
         }
@@ -120,7 +142,7 @@ export const useWindowStore = create((set) => ({
     closeWindow: (id) => set((state) => ({
         windows: {
             ...state.windows,
-            [id]: { ...state.windows[id], isOpen: false }
+            [id]: { ...state.windows[id], isOpen: false, isMinimized: false }
         }
     })),
 
@@ -130,6 +152,19 @@ export const useWindowStore = create((set) => ({
             [id]: { ...state.windows[id], isMinimized: true }
         },
         activeWindowId: null
+    })),
+
+    restoreWindow: (id) => set((state) => ({
+        activeWindowId: id,
+        windows: {
+            ...state.windows,
+            [id]: {
+                ...state.windows[id],
+                isMinimized: false,
+                zIndex: state.nextZIndex
+            }
+        },
+        nextZIndex: state.nextZIndex + 1
     })),
 
     focusWindow: (id) => set((state) => ({

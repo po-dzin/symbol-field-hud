@@ -4,6 +4,7 @@ import RadialMenu from './RadialMenu';
 import { useGraphStore } from '../../store/graphStore';
 import { useStateStore } from '../../store/stateStore';
 import { useWindowStore } from '../../store/windowStore';
+import { useHarmonyStore } from '../../store/harmonyStore';
 
 // Easing function for smooth camera animation
 const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -22,6 +23,8 @@ const GraphCanvas = ({ isEditMode = false }) => {
         cancelConnection
     } = useGraphStore();
     const { mode } = useStateStore();
+    const { isUltraEnabled, harmonics } = useHarmonyStore();
+    const edgeThickness = 1.5 * (isUltraEnabled ? harmonics.modifiers.edgeThickness : 1.0);
     const { onboardingTooltip, showOnboardingTooltip } = useWindowStore();
 
     // Radial Menu State
@@ -167,15 +170,18 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
         console.log('⚡ Quick Connect: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
 
-        // Apply universal repulsion
-        const safePos = calculateSafePosition(initialX, initialY);
-
-        addNode(safePos, tempConnection.sourceId);
-
-        // Release lock after a short delay
-        setTimeout(() => {
-            isCreatingNode.current = false;
-        }, 100);
+        try {
+            // Apply universal repulsion
+            const safePos = calculateSafePosition(initialX, initialY);
+            addNode(safePos, tempConnection.sourceId);
+        } catch (error) {
+            console.error('❌ Failed to create connected node:', error);
+        } finally {
+            // Release lock
+            setTimeout(() => {
+                isCreatingNode.current = false;
+            }, 100);
+        }
     };
 
     // Zoom handler
@@ -274,12 +280,14 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
             // 4. Auto-open properties for the new Core node
             setTimeout(() => {
-                const { openWindow } = useWindowStore.getState();
-                openWindow(`node-properties-${nodeId}`, {
-                    title: 'PROPERTIES',
-                    glyph: 'CORE',
-                    data: { id: nodeId }
-                });
+                setTimeout(() => {
+                    const { openWindow } = useWindowStore.getState();
+                    openWindow('unified-node-properties', {
+                        title: 'PROPERTIES',
+                        glyph: 'CORE',
+                        data: { id: nodeId }
+                    });
+                }, 100);
             }, 100);
         }, 500);
     };
@@ -379,39 +387,41 @@ const GraphCanvas = ({ isEditMode = false }) => {
 
         console.log('✨ Double-click: Creating node at', { x: initialX.toFixed(1), y: initialY.toFixed(1) });
 
-        // Apply universal repulsion
-        const safePos = calculateSafePosition(initialX, initialY);
+        try {
+            // Apply universal repulsion
+            const safePos = calculateSafePosition(initialX, initialY);
 
-        const newNodeId = addNode(safePos);
+            const newNodeId = addNode(safePos);
 
-        // Auto-open properties window for newly created node
-        if (newNodeId) {
+            // Auto-open properties window for newly created node
+            if (newNodeId) {
+                setTimeout(() => {
+                    const { openWindow, windows, closeWindow } = useWindowStore.getState();
+
+                    // Singleton: Close other node-properties windows
+                    Object.keys(windows).forEach(winId => {
+                        if (winId.startsWith('unified-node-properties')) {
+                            closeWindow(winId);
+                        }
+                    });
+
+                    // Open window for new node
+                    const windowId = 'unified-node-properties';
+                    openWindow(windowId, {
+                        title: 'PROPERTIES',
+                        glyph: 'NODE',
+                        data: { id: newNodeId }
+                    });
+                }, 0);
+            }
+        } catch (error) {
+            console.error('❌ Failed to create node:', error);
+        } finally {
+            // Release lock after a short delay
             setTimeout(() => {
-                const { openWindow, windows, closeWindow } = useWindowStore.getState();
-
-                // Singleton: Close other node-properties windows
-                Object.keys(windows).forEach(winId => {
-                    if (winId.startsWith('node-properties-')) {
-                        closeWindow(winId);
-                    }
-                });
-
-                // Open window for new node
-                const windowId = `node-properties-${newNodeId}`;
-                openWindow(windowId, {
-                    title: 'PROPERTIES',
-                    glyph: 'NODE',
-                    data: { id: newNodeId }
-                });
-            }, 0);
+                isCreatingNode.current = false;
+            }, 100);
         }
-
-        // Camera NEVER moves on node creation!
-
-        // Release lock after a short delay
-        setTimeout(() => {
-            isCreatingNode.current = false;
-        }, 100);
     };
 
     // Click Canvas to Create Connected Node (Shift+Click while connecting)
@@ -687,7 +697,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                                     x2={x2}
                                     y2={y2}
                                     stroke={edgeColor}
-                                    strokeWidth="1.5"
+                                    strokeWidth={edgeThickness}
                                     strokeDasharray="5,5"
                                     className="opacity-60"
                                 />
@@ -748,6 +758,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                         key={node.id}
                         node={node}
                         isEditMode={isEditMode}
+                        scale={camera.scale}
                         onClick={handleNodeClick}
                         onSourceOnboarding={handleSourceOnboarding}
                         onRightClick={(nodeId, position) => {
@@ -779,30 +790,36 @@ const GraphCanvas = ({ isEditMode = false }) => {
                 </div>
             )}
 
-            {/* Canvas Status */}
-            <div className="absolute bottom-6 right-6 text-xs font-mono text-os-text-meta opacity-50 pointer-events-none">
-                GRAPH MODE // v0.4 (Pure CSS)
-                <br />
-                NODES: {nodes.length} | EDGES: {edges.length}
-                <br />
-                ZOOM: {camera.scale.toFixed(2)}
-                <br />
-                {interactionState === 'CONNECTING' && <span className="text-os-cyan animate-pulse">CONNECTING...</span>}
-            </div>
+
 
             {/* Onboarding Tooltip */}
-            {onboardingTooltip && (
-                <div
-                    className="absolute top-[60%] left-1/2 -translate-x-1/2
-                               px-6 py-3 bg-black/90 border border-cyan-500/60
-                               text-cyan-300 text-sm tracking-widest font-mono
-                               rounded-md shadow-lg shadow-cyan-500/20
-                               animate-fade-scale pointer-events-none"
-                    style={{ zIndex: 10000 }}
-                >
-                    {onboardingTooltip.message}
-                </div>
-            )}
+            {onboardingTooltip && (() => {
+                // Find Core node and calculate its screen position
+                const coreNode = nodes.find(n => n.entity.type === 'core');
+                if (!coreNode) return null;
+
+                // Calculate Core position in screen coordinates
+                const screenX = coreNode.position.x * camera.scale + camera.x;
+                const screenY = coreNode.position.y * camera.scale + camera.y;
+
+                return (
+                    <div
+                        className="absolute pointer-events-none
+                                   px-6 py-3 bg-black/90 border border-cyan-500/60
+                                   text-cyan-300 text-sm tracking-widest font-mono
+                                   rounded-md shadow-lg shadow-cyan-500/20
+                                   animate-fade-scale"
+                        style={{
+                            zIndex: 10000,
+                            left: `${screenX}px`,
+                            top: `${screenY + 96}px`, // 96px below Core (24×4, harmonic)
+                            transform: 'translateX(-50%)'
+                        }}
+                    >
+                        {onboardingTooltip.message}
+                    </div>
+                );
+            })()}
 
             {/* Radial Menu */}
             {radialMenu && (

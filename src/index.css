@@ -13,6 +13,14 @@
   --text-secondary: #B4B9C1;
   --text-meta: #6B7280;
 
+  /* Harmonic Typography Scale (v0.1) */
+  --text-base: 16px;
+  /* 2U */
+  --text-sub: 18px;
+  /* ~2.25U */
+  --text-head: 24px;
+  /* 3U */
+
   color: var(--text-primary);
   background-color: theme('colors.os-dark');
 
@@ -33,6 +41,31 @@
   --z-trinity: 5000;
   /* Always on top */
   --z-ritual: 6000;
+
+  /* Harmonic Grid System (v0.1) */
+  --unit: 8px;
+
+  /* Layout Proportions (vw based) */
+  --width-nav: 14.6vw;
+  --width-graph: 61.8vw;
+  --width-dock: 23.6vw;
+
+  /* Vertical Proportions (vh based) */
+  --height-header: 14.6vh;
+  --height-body: 70.8vh;
+  --height-footer: 14.6vh;
+
+  /* Standard Sizes */
+  --size-btn: 40px;
+  /* 5U */
+  --size-btn-mini: 16px;
+  /* 2U */
+  --size-node-s: 24px;
+  /* 3U */
+  --size-node-m: 40px;
+  /* 5U */
+  --size-node-l: 64px;
+  /* 8U */
 }
 
 /* DEEP Mode (Default Dark) */
@@ -49,6 +82,12 @@
   --panel-bg: rgba(4, 7, 10, 0.96);
   --panel-stroke-enhanced: rgba(170, 210, 225, 0.55);
   --panel-glow-opacity: 0.75;
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 6%;
+  --harmony-sat: 8%;
+  --harmony-glow-luma: 18%;
+  --harmony-glow-sat: 23%;
 }
 
 /* FLOW Mode */
@@ -61,6 +100,12 @@
   --canvas-bg: hsl(215, 22%, 10%);
   --panel-bg: hsl(215, 24%, 14%, 0.8);
   --grid-opacity: 0.22;
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 12%;
+  --harmony-sat: 8%;
+  --harmony-glow-luma: 24%;
+  --harmony-glow-sat: 23%;
 }
 
 /* Unified Panel Borders (v0.309.2) - Static across all modes */
@@ -145,6 +190,12 @@
 
   --surface-highlight: rgba(255, 255, 255, 0.2);
   --surface-dim: rgba(42, 38, 32, 0.1);
+
+  /* Harmony Engine Bindings */
+  --harmony-luma: 86%;
+  --harmony-sat: 35%;
+  --harmony-glow-luma: 98%;
+  --harmony-glow-sat: 50%;
 }
 
 body {
