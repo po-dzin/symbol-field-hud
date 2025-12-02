@@ -269,7 +269,8 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     // Aging System
     const now = Date.now();
     const lastEditedAt = node.state?.lastEditedAt || now;
-    const activatedAt = node.state?.activatedAt || now;
+    // Fallback: if no activatedAt, use lastEditedAt (ensures new nodes glow)
+    const activatedAt = node.state?.activatedAt || node.state?.lastEditedAt || now;
     const ageMs = now - lastEditedAt;
     const timeSinceActivation = now - activatedAt;
 
@@ -287,47 +288,46 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     const milestone = getMilestone(ageMs, timeScale);
 
     // --- JOY GLOW (Selection-based) ---
-    // Track deselect timestamp
-    const [deselectTimestamp, setDeselectTimestamp] = useState(null);
+    // Track deselect timestamp with ref for synchronous updates
+    const deselectTimestampRef = React.useRef(null);
     const prevWindowOpen = React.useRef(isWindowOpen);
 
-    useEffect(() => {
-        // Window just closed → start 8s fade
-        if (prevWindowOpen.current && !isWindowOpen) {
-            setDeselectTimestamp(Date.now());
-        }
-        // Window opened → reset fade
-        if (!prevWindowOpen.current && isWindowOpen) {
-            setDeselectTimestamp(null);
-        }
-        prevWindowOpen.current = isWindowOpen;
-    }, [isWindowOpen]);
+    // Update deselect timestamp synchronously during render
+    if (isWindowOpen && deselectTimestampRef.current !== null) {
+        // Window is open → clear fade immediately
+        deselectTimestampRef.current = null;
+    } else if (timeSinceActivation < 100 && deselectTimestampRef.current !== null) {
+        // Just activated → clear any existing deselect fade
+        deselectTimestampRef.current = null;
+    } else if (!isWindowOpen && prevWindowOpen.current && deselectTimestampRef.current === null) {
+        // Window just closed → start fade
+        deselectTimestampRef.current = Date.now();
+    }
+    prevWindowOpen.current = isWindowOpen;
+
+    // Get current timestamp value
+    const deselectTimestamp = deselectTimestampRef.current;
 
     // Calculate joy state
     let isJoyful = false;
     let joyIntensity = 0;
 
-    // 1. Activation Glow (First 8 seconds)
-    if (timeSinceActivation < 8000) {
-        isJoyful = true;
-        joyIntensity = 1 - (timeSinceActivation / 8000);
-    }
-
-    // 2. Selection Glow (Overrides activation if stronger)
+    // Priority 1: Window Open (always max, overrides everything)
     if (isWindowOpen) {
-        // Window open → full glow
         isJoyful = true;
-        joyIntensity = 1.25; // 125% intensity
-    } else if (deselectTimestamp) {
-        // After deselect → 8s fade
+        joyIntensity = 1.25;
+    }
+    // Priority 2: Activation Glow (first 8 seconds)
+    else if (timeSinceActivation < 8000) {
+        isJoyful = true;
+        joyIntensity = 1.25 * (1 - (timeSinceActivation / 8000));
+    }
+    // Priority 3: Deselect Fade (8 seconds after close)
+    else if (deselectTimestamp) {
         const timeSinceDeselect = now - deselectTimestamp;
         if (timeSinceDeselect < 8000) {
-            const deselectIntensity = 1.25 * (1 - (timeSinceDeselect / 8000));
-            // Use whichever is stronger (activation or deselect fade)
-            if (deselectIntensity > joyIntensity) {
-                isJoyful = true;
-                joyIntensity = deselectIntensity;
-            }
+            isJoyful = true;
+            joyIntensity = 1.25 * (1 - (timeSinceDeselect / 8000));
         }
     }
 
@@ -541,16 +541,18 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                         style={{
                             ...crystalStyle,
                             opacity: 0.8 * brightnessFactor,
-                            // Joy Glow: smooth 8s fade via box-shadow spread
+                            // Joy Glow: smooth transitions
                             filter: isJoyful
                                 ? `${crystalStyle.filter} brightness(${1 + joyIntensity * 0.3})`
                                 : crystalStyle.filter,
                             boxShadow: isJoyful
-                                ? `${crystalStyle.boxShadow}, 0 0 ${20 * joyIntensity}px ${6 * joyIntensity}px rgba(${accentRGB}, ${0.8 * joyIntensity})`
+                                ? `${crystalStyle.boxShadow}, 0 0 ${30 * joyIntensity}px ${12 * joyIntensity}px rgba(${accentRGB}, ${0.8 * joyIntensity})`
                                 : crystalStyle.boxShadow,
                             transition: isDragging
-                                ? 'none'  // Disable during drag
-                                : 'filter 8s ease-out, box-shadow 8s ease-out, opacity 0.3s ease-out'  // Smooth fade
+                                ? 'none'  // No transition when dragging
+                                : isWindowOpen
+                                    ? 'filter 1s ease-out, box-shadow 1s ease-out, opacity 0.3s ease-out'  // Quick ramp up (1s)
+                                    : 'filter 8s ease-out, box-shadow 8s ease-out, opacity 0.3s ease-out'  // Slow fade down (8s)
                         }}
                     >
                         {/* Lidar Scan Effect Overlay (Subtler) */}
