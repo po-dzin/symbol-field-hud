@@ -6,6 +6,15 @@ import { useWindowStore } from '../../store/windowStore';
 import { useHarmonyStore } from '../../store/harmonyStore';
 
 import { calculateGeometry, calculateColorHarmonics, snapToGrid } from '../../engine/harmonics';
+import {
+    getAgingFactor,
+    getBrightnessFactor,
+    getSizeFactor,
+    getBlurAmount,
+    isJoyful as checkIsJoyful,
+    getJoyIntensity,
+    getMilestone
+} from '../../engine/forgettingCurve';
 
 const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSourceOnboarding }) => {
     const { entity, components, state } = node;
@@ -75,6 +84,11 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
 
         // Always record start position for click vs drag detection
         dragStartRef.current = { x: e.clientX, y: e.clientY };
+
+        // SOURCE and CORE are FIXED - cannot be dragged
+        if (isSource || isCore) {
+            return; // Allow click/double-click, but no dragging
+        }
 
         // Shift+Click = Connection (handled in handleClick, not here)
         if (e.shiftKey) {
@@ -234,9 +248,11 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         onClick && onClick(node);
     };
 
-    // Check if properties window is open for this node
+    // Check if ANY window is open for this node (Properties OR Document)
     const { windows } = useWindowStore();
-    const isWindowOpen = windows['unified-node-properties']?.isOpen && windows['unified-node-properties']?.data?.id === node.id;
+    const isWindowOpen = Object.values(windows).some(w =>
+        w.isOpen && w.data?.id === node.id && !w.isMinimized
+    );
 
     const handleContextMenu = (e) => {
         e.preventDefault();
@@ -257,25 +273,63 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     const ageMs = now - lastEditedAt;
     const timeSinceActivation = now - activatedAt;
 
-    // Age in minutes
-    const ageMinutes = ageMs / (1000 * 60);
+    // --- FORGETTING CURVE AGING SYSTEM ---
+    // Get current time scale for adaptive aging
+    const { timeScale = 'DAY' } = useStateStore();
 
-    // Aging factors (0 = fresh, 1 = very old)
-    // Starts fading after 5 minutes, fully faded after 60 minutes
-    const ageFactor = Math.min(1, Math.max(0, (ageMinutes - 5) / 55));
+    // Calculate aging using exponential forgetting curve
+    const ageFactor = getAgingFactor(ageMs, timeScale);
+    const brightnessFactor = getBrightnessFactor(ageFactor);
+    const sizeFactor = getSizeFactor(ageFactor);
+    const blurAmount = getBlurAmount(ageFactor);
 
-    // Brightness: 1.0 (fresh, BRIGHT like panels) -> 0.4 (old, decayed)
-    const brightnessFactor = 1.0 - (ageFactor * 0.6);
+    // Milestone detection for visual pulse
+    const milestone = getMilestone(ageMs, timeScale);
 
-    // Size: 1.0 (fresh) -> 0.7 (old)
-    const sizeFactor = 1.0 - (ageFactor * 0.3);
+    // --- JOY GLOW (Selection-based) ---
+    // Track deselect timestamp
+    const [deselectTimestamp, setDeselectTimestamp] = useState(null);
+    const prevWindowOpen = React.useRef(isWindowOpen);
 
-    // Blur: 0px (fresh) -> 4px (old)
-    const blurAmount = ageFactor * 4;
+    useEffect(() => {
+        // Window just closed → start 8s fade
+        if (prevWindowOpen.current && !isWindowOpen) {
+            setDeselectTimestamp(Date.now());
+        }
+        // Window opened → reset fade
+        if (!prevWindowOpen.current && isWindowOpen) {
+            setDeselectTimestamp(null);
+        }
+        prevWindowOpen.current = isWindowOpen;
+    }, [isWindowOpen]);
 
-    // Joy animation (first 60 seconds after activation)
-    const isJoyful = timeSinceActivation < 60000; // 1 minute
-    const joyIntensity = Math.max(0, 1 - (timeSinceActivation / 60000));
+    // Calculate joy state
+    let isJoyful = false;
+    let joyIntensity = 0;
+
+    // 1. Activation Glow (First 8 seconds)
+    if (timeSinceActivation < 8000) {
+        isJoyful = true;
+        joyIntensity = 1 - (timeSinceActivation / 8000);
+    }
+
+    // 2. Selection Glow (Overrides activation if stronger)
+    if (isWindowOpen) {
+        // Window open → full glow
+        isJoyful = true;
+        joyIntensity = 1.25; // 125% intensity
+    } else if (deselectTimestamp) {
+        // After deselect → 8s fade
+        const timeSinceDeselect = now - deselectTimestamp;
+        if (timeSinceDeselect < 8000) {
+            const deselectIntensity = 1.25 * (1 - (timeSinceDeselect / 8000));
+            // Use whichever is stronger (activation or deselect fade)
+            if (deselectIntensity > joyIntensity) {
+                isJoyful = true;
+                joyIntensity = deselectIntensity;
+            }
+        }
+    }
 
     // --- HARMONY ENGINE INTEGRATION ---
     const { isUltraEnabled, harmonics: globalHarmonics } = useHarmonyStore();
@@ -318,12 +372,17 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
 
     return (
         <div
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group flex items-center justify-center outline-none transition-all duration-300"
+            className={clsx(
+                "absolute transform -translate-x-1/2 -translate-y-1/2 group flex items-center justify-center outline-none cursor-pointer",
+                milestone && "animate-milestone"
+            )}
             style={{
                 left: node.position.x,
                 top: node.position.y,
                 zIndex: isCore ? 50 : (isWindowOpen ? 60 : 10),
-                filter: `contrast(${hudContrast})`
+                filter: `contrast(${hudContrast})`,
+                // Smooth position transition when NOT dragging
+                transition: isDragging ? 'none' : 'left 0.15s ease-out, top 0.15s ease-out'
             }}
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
@@ -461,7 +520,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                         <div>
                             {/* Large central glyph - Clean rendering without shadows to prevent artifacts */}
                             <span
-                                className="relative z-10 block text-5xl text-white font-sans leading-none select-none flex items-center justify-center w-[1em] h-[1em]"
+                                className="relative z-10 block text-4xl text-white font-sans leading-none select-none flex items-center justify-center w-[1em] h-[1em]"
                                 style={{ filter: 'none' }}
                             >
                                 {glyphChar || '◉'}
@@ -476,13 +535,22 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                 <>
                     <div
                         className={clsx(
-                            "relative flex items-center justify-center rounded-full transition-all duration-300 animate-liquid",
-                            size,
-                            isJoyful && "animate-joy"
+                            "relative flex items-center justify-center rounded-full animate-liquid",
+                            size
                         )}
                         style={{
                             ...crystalStyle,
-                            opacity: 0.8 * brightnessFactor
+                            opacity: 0.8 * brightnessFactor,
+                            // Joy Glow: smooth 8s fade via box-shadow spread
+                            filter: isJoyful
+                                ? `${crystalStyle.filter} brightness(${1 + joyIntensity * 0.3})`
+                                : crystalStyle.filter,
+                            boxShadow: isJoyful
+                                ? `${crystalStyle.boxShadow}, 0 0 ${20 * joyIntensity}px ${6 * joyIntensity}px rgba(${accentRGB}, ${0.8 * joyIntensity})`
+                                : crystalStyle.boxShadow,
+                            transition: isDragging
+                                ? 'none'  // Disable during drag
+                                : 'filter 8s ease-out, box-shadow 8s ease-out, opacity 0.3s ease-out'  // Smooth fade
                         }}
                     >
                         {/* Lidar Scan Effect Overlay (Subtler) */}

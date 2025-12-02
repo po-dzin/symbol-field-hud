@@ -549,8 +549,10 @@ body {
   }
 }
 
+/* Joy Glow: Smooth 8-second fade after deselect */
 .animate-joy {
   animation: joy-glow 4s ease-in-out infinite;
+  transition: opacity 8s ease-out, filter 8s ease-out;
 }
 
 @keyframes joy-vibrate {
@@ -645,4 +647,29 @@ body {
 
 .animate-core-morph {
   animation: core-ring-morph 4s ease-in-out infinite;
+}
+
+/* ============================ */
+/* MILESTONE PULSE ANIMATION    */
+/* ============================ */
+/* Triggered when node crosses age thresholds (1h, 1d, 1w, 1m, 3m) */
+@keyframes milestone-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+}
+
+.animate-milestone {
+  animation: milestone-pulse 2s ease-in-out;
 }
