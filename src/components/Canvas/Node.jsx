@@ -418,7 +418,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                                     isWindowOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                 )}
                                 style={{
-                                    border: `2px solid rgba(255, 255, 255, 0.4)`
+                                    border: `1px solid rgba(255, 255, 255, 0.65)`
                                 }}
                             />
 
@@ -434,7 +434,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                                         rgba(0, 0, 255, 0.4),
                                         rgba(255, 0, 255, 0.4),
                                         rgba(255, 0, 0, 0.4))`,
-                                    animation: 'spin-slow 18s linear infinite',
+                                    animation: 'spin-slow 12s linear infinite',
                                     mixBlendMode: 'screen',
                                     maskImage: 'radial-gradient(circle, transparent 65%, black 75%, black 85%, transparent 95%)'
                                 }}
@@ -443,7 +443,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                             {/* Rotating dashed selection - on hover or when window open (107px = 0.75x) */}
                             <div
                                 className={clsx(
-                                    "absolute rounded-full border-2 border-dashed animate-spin-slow transition-opacity",
+                                    "absolute rounded-full animate-spin-slow transition-opacity",
                                     isWindowOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                 )}
                                 style={{
@@ -452,6 +452,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                                     left: '50%',
                                     top: '50%',
                                     transform: 'translate(-50%, -50%)',
+                                    border: `2px dashed`,
                                     borderColor: 'rgba(255, 255, 255, 0.2)',
                                 }}
                             />
@@ -481,7 +482,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                         )}
                         style={{
                             ...crystalStyle,
-                            opacity: 0.7 * brightnessFactor
+                            opacity: 0.8 * brightnessFactor
                         }}
                     >
                         {/* Lidar Scan Effect Overlay (Subtler) */}
@@ -538,7 +539,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
 const getGlyphChar = (id) => {
     const map = {
         'core': '◉', // Base core glyph
-        'node': '⬡',
+        'crystal': '⬡',
         'void': '○'
     };
     return map[id] || null;
