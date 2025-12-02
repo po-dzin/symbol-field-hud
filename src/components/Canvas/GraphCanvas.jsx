@@ -284,7 +284,7 @@ const GraphCanvas = ({ isEditMode = false }) => {
                     const { openWindow } = useWindowStore.getState();
                     openWindow('unified-node-properties', {
                         title: 'PROPERTIES',
-                        glyph: 'CORE',
+                        glyph: '◉',
                         data: { id: nodeId }
                     });
                 }, 100);

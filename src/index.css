@@ -534,7 +534,7 @@ body {
 }
 
 .animate-liquid {
-  animation: liquid-flow 8s ease-in-out infinite;
+  animation: liquid-flow 4s ease-in-out infinite;
 }
 
 @keyframes joy-glow {
@@ -550,7 +550,7 @@ body {
 }
 
 .animate-joy {
-  animation: joy-glow 2s ease-in-out infinite;
+  animation: joy-glow 4s ease-in-out infinite;
 }
 
 @keyframes joy-vibrate {
@@ -608,14 +608,14 @@ body {
     opacity: 0.3;
     transform: scale(1);
     filter: blur(0px) brightness(1);
-    box-shadow: 0 0 30px currentColor;
+    box-shadow: 0 0 20px currentColor;
   }
 
   50% {
     opacity: 0.6;
     transform: scale(1.05);
     filter: blur(1px) brightness(1.3);
-    box-shadow: 0 0 60px currentColor;
+    box-shadow: 0 0 30px currentColor;
   }
 }
 
@@ -644,5 +644,5 @@ body {
 }
 
 .animate-core-morph {
-  animation: core-ring-morph 8s ease-in-out infinite;
+  animation: core-ring-morph 4s ease-in-out infinite;
 }

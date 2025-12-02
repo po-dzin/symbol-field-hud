@@ -29,11 +29,13 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
         if (!timeWindow) return 'N/A';
 
         if (timeWindow.kind === 'DAY') {
-            // Show date and time for DAY mode
+            // Show time and date for DAY mode: HH:MM DD/MM/YYYY
             const now = new Date();
-            const date = now.toISOString().split('T')[0];
             const time = now.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
-            return `${date} ${time}`;
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${time} ${day}/${month}/${year}`;
         }
 
         return formatTW(timeWindow);
@@ -68,13 +70,13 @@ const TimeChip = ({ timeWindow, onScaleChange, onOpenCalendar }) => {
             {/* Scale Button */}
             <button
                 onClick={handleCycleScale}
-                className={`flex flex-col items-start justify-center w-[140px] transition-all duration-300 cursor-pointer ${mode === 'LUMA' ? 'hover:opacity-70' : 'hover:opacity-80'}`}
+                className={`flex flex-col items-start justify-center w-[144px] transition-all duration-300 cursor-pointer ${mode === 'LUMA' ? 'hover:opacity-70' : 'hover:opacity-80'}`}
                 title={`Current: ${timeWindow.kind}. Click to cycle.`}
             >
-                <span className="text-sm font-bold tracking-widest" style={{ color: activeColor }}>
+                <span className="text-base font-bold tracking-widest" style={{ color: activeColor }}>
                     {timeWindow.kind}
                 </span>
-                <span className="text-[10px] uppercase opacity-60 truncate w-full text-left" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>
+                <span className="text-xs uppercase opacity-60 truncate w-full text-left" style={{ color: mode === 'LUMA' ? '#5b5349' : 'var(--text-secondary)' }}>
                     {formatDisplay()}
                 </span>
             </button>

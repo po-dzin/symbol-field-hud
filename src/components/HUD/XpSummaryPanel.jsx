@@ -23,7 +23,7 @@ const XpSummaryPanel = () => {
             <div ref={nodeRef} className="absolute top-[120px] left-[120px] flex flex-col items-start gap-2 pointer-events-auto">
                 {/* Panel Container */}
                 <div
-                    className="backdrop-blur-xl px-5 py-3 w-auto h-[72px] flex flex-wrap gap-4 justify-center items-center xp-handle cursor-grab active:cursor-grabbing"
+                    className="backdrop-blur-xl px-5 w-auto h-[72px] flex items-center justify-center xp-handle cursor-grab active:cursor-grabbing"
                     style={{
                         background: 'var(--surface-1-bg)',
                         border: `var(--panel-stroke-width) solid rgba(${accentRGB}, 0.35)`,
@@ -44,7 +44,7 @@ const XpSummaryPanel = () => {
                         ].map(item => (
                             <div key={item.label} className="flex flex-col items-center gap-0.5" title={`${item.label} // ${item.fullName}`}>
                                 <div
-                                    className="flex items-center justify-center w-9 h-9 rounded-full text-base"
+                                    className="flex items-center justify-center w-10 h-10 rounded-full text-base"
                                     style={{
                                         background: `rgba(${accentRGB}, 0.1)`,
                                         border: `2px solid ${item.color}`,
@@ -78,7 +78,7 @@ const XpRow = ({ label, value, icon, color }) => {
                 <span className="opacity-60 grayscale group-hover:grayscale-0 transition-all duration-300">{icon}</span>
                 <span className="text-xs font-medium">{label}</span>
             </div>
-            <span className="text-sm font-mono font-bold" style={{ color: color }}>
+            <span className="text-xs font-mono font-bold" style={{ color: color }}>
                 {value}
             </span>
         </div>

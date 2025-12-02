@@ -123,6 +123,14 @@ export function nextTimeScale(currentKind) {
 }
 
 /**
+ * Format date string to DD/MM/YYYY
+ */
+function formatDateDDMMYYYY(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+/**
  * Format TimeWindow for display
  */
 export function formatTimeWindow(timeWindow) {
@@ -131,12 +139,12 @@ export function formatTimeWindow(timeWindow) {
     const { kind, from, to } = timeWindow;
 
     if (kind === 'NOW' || kind === 'DAY') {
-        return from;
+        return formatDateDDMMYYYY(from);
     }
 
     if (from === to) {
-        return from;
+        return formatDateDDMMYYYY(from);
     }
 
-    return `${from} — ${to}`;
+    return `${formatDateDDMMYYYY(from)} — ${formatDateDDMMYYYY(to)}`;
 }

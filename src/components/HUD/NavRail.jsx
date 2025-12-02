@@ -136,8 +136,8 @@ const NavRail = () => {
                 </div>
             </div>
 
-            {/* Toggle Arrow at Bottom - Fixed Position */}
-            <div className="absolute left-0 bottom-6 w-[72px] flex justify-center z-30">
+            {/* Toggle Arrow at Bottom - Aligned with SystemDock */}
+            <div className="absolute left-0 bottom-4 w-[72px] flex justify-center z-30">
                 <button
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${mode === 'LUMA' ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
                     onClick={(e) => {

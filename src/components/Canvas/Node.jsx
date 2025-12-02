@@ -55,7 +55,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
     // Visual Config
     // Core: Small seed (w-24) + LARGE outer ring
     // Container: base size w-16
-    const size = isCore ? 'w-24 h-24' : isSource ? 'w-12 h-12' : 'w-16 h-16';
+    const size = isCore ? 'w-24 h-24' : isSource ? 'w-12 h-12' : 'w-12 h-12';
     const fontSize = isCore ? 'text-3xl' : isSource ? 'text-[0px]' : 'text-xl';
 
     // Hex to RGB for rgba usage
@@ -160,7 +160,7 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                     const { openWindow } = useWindowStore.getState();
                     openWindow('unified-node-properties', {
                         title: 'PROPERTIES',
-                        glyph: 'CORE',
+                        glyph: '◉',
                         data: { id: node.id }
                     });
                 }, 100);
@@ -214,13 +214,23 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         const { activateNode } = useGraphStore.getState();
         activateNode(node.id);
 
-        // Open Properties Window with Unified ID (Singleton)
+        // Check if properties window is already open for THIS node
+        const { windows, openWindow, focusWindow } = useWindowStore.getState();
         const windowId = 'unified-node-properties';
-        openWindow(windowId, {
-            title: 'PROPERTIES',
-            glyph: glyphChar || (isSource ? 'SOURCE' : 'NODE'),
-            data: { id: node.id }
-        });
+        const existingWindow = windows[windowId];
+
+        if (existingWindow?.isOpen && existingWindow?.data?.id === node.id) {
+            // Window already open for this node - just focus it
+            focusWindow(windowId);
+        } else {
+            // Open or update window with new node data
+            openWindow(windowId, {
+                title: 'PROPERTIES',
+                glyph: glyphChar || (isSource ? 'SOURCE' : 'NODE'),
+                data: { id: node.id }
+            });
+        }
+
         onClick && onClick(node);
     };
 
@@ -294,11 +304,11 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
         boxShadow: `
             inset -8px -8px 30px rgba(0,0,0,0.6),
             inset 4px 4px 20px rgba(255,255,255,${0.7 * brightnessFactor}),
-            0 0 ${40 * brightnessFactor * glowIntensity}px rgba(${accentRGB}, ${0.4 * brightnessFactor * glowIntensity})
+            0 0 ${6 * brightnessFactor * glowIntensity}px rgba(${accentRGB}, ${0.4 * brightnessFactor * glowIntensity})
         `,
         backdropFilter: `blur(${8 + blurAmount}px)`,
         filter: `blur(${blurAmount}px) brightness(${brightnessFactor})`,
-        transform: `scale(${sizeFactor * harmonicScale})`, // Apply harmonic scale
+        transform: `scale(1.0)`, // Full size, no scaling down
         transition: 'all 2s ease-out'
     };
 
@@ -351,12 +361,12 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                 <>
                     {/* Crystallization Animation Wrapper */}
                     <div className="absolute inset-0 flex items-center justify-center animate-crystallize">
-                        {/* Rainbow glow aura - rotating */}
+                        {/* Rainbow glow aura - 120px (1.25x ratio from 96px ring) */}
                         <div
-                            className="absolute rounded-full"
+                            className="absolute rounded-full animate-core-breathe"
                             style={{
-                                width: '180px',
-                                height: '180px',
+                                width: '120px',
+                                height: '120px',
                                 background: `conic-gradient(from 0deg,
                                     rgba(255, 0, 0, 0.4),
                                     rgba(255, 127, 0, 0.4),
@@ -366,23 +376,23 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                                     rgba(0, 0, 255, 0.4),
                                     rgba(148, 0, 211, 0.4),
                                     rgba(255, 0, 0, 0.4))`,
-                                filter: 'blur(40px)',
+                                filter: 'blur(20px)',
                                 animation: 'spin-slow 25s linear infinite'
                             }}
                         />
 
-                        {/* LARGE OUTER Ring - 128px (2x base container) - SOLID 3D GLASS */}
+                        {/* OUTER Ring - 96px (12U, 1.5x container) - SOLID 3D GLASS */}
                         <div
                             className="absolute flex items-center justify-center pointer-events-none"
                             style={{
-                                width: '128px',
-                                height: '128px',
+                                width: '96px',
+                                height: '96px',
                                 left: '50%',
                                 top: '50%',
                                 transform: 'translate(-50%, -50%)'
                             }}
                         >
-                            {/* Main THICK glass ring with rainbow shimmer */}
+                            {/* Main glass ring - always visible */}
                             <div
                                 className="absolute inset-0 rounded-full animate-core-breathe animate-core-morph"
                                 style={{
@@ -397,42 +407,52 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                                         0 0 60px rgba(200, 200, 255, 0.6),
                                         0 0 90px rgba(150, 150, 255, 0.4)
                                     `,
-                                    backdropFilter: 'blur(12px)',
-                                    border: `2px solid rgba(255, 255, 255, 0.4)`,
+                                    backdropFilter: 'blur(12px)'
                                 }}
                             />
 
-                            {/* Rainbow shimmer rotating overlay */}
+                            {/* Glass ring border - visible on hover/selection */}
                             <div
-                                className="absolute inset-0 rounded-full opacity-50"
+                                className={clsx(
+                                    "absolute inset-0 rounded-full transition-opacity pointer-events-none",
+                                    isWindowOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                )}
+                                style={{
+                                    border: `2px solid rgba(255, 255, 255, 0.4)`
+                                }}
+                            />
+
+                            {/* Rainbow torus - wide boundary, bright */}
+                            <div
+                                className="absolute inset-0 rounded-full opacity-70"
                                 style={{
                                     background: `conic-gradient(from 0deg,
-                                        rgba(255, 0, 0, 0.3),
-                                        rgba(255, 255, 0, 0.3),
-                                        rgba(0, 255, 0, 0.3),
-                                        rgba(0, 255, 255, 0.3),
-                                        rgba(0, 0, 255, 0.3),
-                                        rgba(255, 0, 255, 0.3),
-                                        rgba(255, 0, 0, 0.3))`,
+                                        rgba(255, 0, 0, 0.4),
+                                        rgba(255, 255, 0, 0.4),
+                                        rgba(0, 255, 0, 0.4),
+                                        rgba(0, 255, 255, 0.4),
+                                        rgba(0, 0, 255, 0.4),
+                                        rgba(255, 0, 255, 0.4),
+                                        rgba(255, 0, 0, 0.4))`,
                                     animation: 'spin-slow 18s linear infinite',
                                     mixBlendMode: 'screen',
-                                    maskImage: 'radial-gradient(circle, transparent 40%, black 45%, black 55%, transparent 60%)'
+                                    maskImage: 'radial-gradient(circle, transparent 65%, black 75%, black 85%, transparent 95%)'
                                 }}
                             />
 
-                            {/* Rotating dashed selection - on hover or when window open */}
+                            {/* Rotating dashed selection - on hover or when window open (107px = 0.75x) */}
                             <div
                                 className={clsx(
                                     "absolute rounded-full border-2 border-dashed animate-spin-slow transition-opacity",
-                                    isWindowOpen ? "opacity-50" : "opacity-0 group-hover:opacity-50"
+                                    isWindowOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                 )}
                                 style={{
-                                    width: '142px',
-                                    height: '142px',
+                                    width: '107px',
+                                    height: '107px',
                                     left: '50%',
                                     top: '50%',
                                     transform: 'translate(-50%, -50%)',
-                                    borderColor: '#fff',
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
                                 }}
                             />
                         </div>
@@ -475,8 +495,11 @@ const Node = ({ node, isEditMode = false, scale = 1, onClick, onRightClick, onSo
                         />
                         {/* Empty */}
                     </div>
-                    {/* Hover Effect */}
-                    <div className="absolute inset-0 rounded-full border border-white/40 opacity-0 group-hover:opacity-100 transition-opacity scale-110" />
+                    {/* Hover Effect - Solid border (stays on selection) */}
+                    <div className={clsx(
+                        "absolute inset-0 rounded-full border border-white/40 transition-opacity scale-110",
+                        isWindowOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    )} />
                 </>
             )}
 
